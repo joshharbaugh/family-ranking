@@ -1,37 +1,38 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { X, Users, Save, Loader2 } from 'lucide-react';
-import { useFamilyStore } from '@/app/store/family-store';
+import React, { useEffect, useState } from 'react'
+import { X, Users, Save, Loader2 } from 'lucide-react'
+import { useFamilyStore } from '@/app/store/family-store'
 // import { useUserStore } from '@/store/userStore';
-import { FamilyRole } from '@/lib/definitions/family';
-import { UserSearch } from '@/app/ui/user-search';
-import { UserProfile } from '@/lib/definitions/user';
+import { FamilyRole } from '@/lib/definitions/family'
+import { UserSearch } from '@/app/ui/user-search'
+import { UserProfile } from '@/lib/definitions/user'
 
 interface AddFamilyMemberModalProps {
-  currentUserId: string;
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
+  currentUserId: string
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
 }
 
 export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   currentUserId,
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }) => {
-  const { addFamilyMember, clearError, currentFamily, loading, error } = useFamilyStore();
+  const { addFamilyMember, clearError, currentFamily, loading, error } =
+    useFamilyStore()
   // const { users, loading: usersLoading, error: usersError, fetchUsersByName } = useUserStore();
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [userId, setUserId] = useState('');
-  const [role] = useState<FamilyRole>('other');
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [userId, setUserId] = useState('')
+  const [role] = useState<FamilyRole>('other')
   // const [search, setSearch] = useState('');
 
   useEffect(() => {
     // Animate in/out
-    setIsAnimating(isOpen);
-  }, [isOpen]);
+    setIsAnimating(isOpen)
+  }, [isOpen])
 
   // Search for users
   // useEffect(() => {
@@ -46,35 +47,35 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   // }, [search]);
 
   const handleUserSelect = (user: UserProfile) => {
-    setUserId(user.uid);
-  };
+    setUserId(user.uid)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!currentFamily?.id) {
-      return;
+      return
     }
 
     try {
-      await addFamilyMember(currentFamily.id, userId, role as FamilyRole);
-      handleClose();
-      onSuccess?.();
+      await addFamilyMember(currentFamily.id, userId, role as FamilyRole)
+      handleClose()
+      onSuccess?.()
     } catch {
       // Error is handled by the store
     }
-  };
+  }
 
   const handleClose = () => {
     // Animate out before closing
-    setIsAnimating(false);
+    setIsAnimating(false)
     setTimeout(() => {
-      clearError();
-      onClose();
-    }, 200);
-  };
+      clearError()
+      onClose()
+    }, 200)
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -102,17 +103,23 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
         </div>
 
         {/* Search for users */}
-        <UserSearch currentUserId={currentUserId} onUserSelect={handleUserSelect} />
+        <UserSearch
+          currentUserId={currentUserId}
+          onUserSelect={handleUserSelect}
+        />
 
         {/* Form */}
-        {userId && <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
+        {userId && (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {error}
+                </p>
+              </div>
+            )}
 
-          {/* <div>
+            {/* <div>
             <label htmlFor="family-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Name *
             </label>
@@ -127,7 +134,7 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
             />
           </div> */}
 
-          {/* <div>
+            {/* <div>
             <label htmlFor="family-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Description (Optional)
             </label>
@@ -140,7 +147,8 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100 resize-none"
             />
           </div> */}
-        </form>}
+          </form>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
@@ -173,5 +181,5 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

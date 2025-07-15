@@ -1,8 +1,7 @@
-import UISelect from '@/app/ui/select';
-import { Book, Film, Gamepad2, Tv } from 'lucide-react';
+import UISelect from '@/app/ui/select'
+import { Book, Film, Gamepad2, Tv } from 'lucide-react'
 
-const pulse =
-  'animate-[pulse_2s_infinite] bg-gray-200 dark:bg-gray-700';
+const pulse = 'animate-[pulse_2s_infinite] bg-gray-200 dark:bg-gray-700'
 
 export function RankingsSkeleton() {
   const sortItems = [
@@ -10,12 +9,14 @@ export function RankingsSkeleton() {
     { label: 'Lowest Rated', value: 'rank-asc' },
     { label: 'Recently Added', value: 'date-desc' },
     { label: 'Oldest First', value: 'date-asc' },
-    { label: 'Title A-Z', value: 'title' }
-  ];
+    { label: 'Title A-Z', value: 'title' },
+  ]
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header with Stats Skeleton */}
-      <div className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[216px]`}></div>
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[216px]`}
+      ></div>
       {/* Filters and Sort Skeleton */}
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Filter Buttons */}
@@ -69,11 +70,14 @@ export function RankingsSkeleton() {
       {/* Rankings List Skeleton */}
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div className={`${pulse} flex items-center gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[152px]`} key={i}></div>
+          <div
+            className={`${pulse} flex items-center gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[152px]`}
+            key={i}
+          ></div>
         ))}
       </div>
     </div>
-  );
+  )
 }
 
 export default function FamilyPageSkeleton() {
@@ -81,5 +85,5 @@ export default function FamilyPageSkeleton() {
     <>
       <div className={`${pulse} space-y-6 bg-gray-100`} />
     </>
-  );
+  )
 }

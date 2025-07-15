@@ -1,68 +1,68 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Star, Calendar, Save } from 'lucide-react';
-import { Media, Ranking } from '@/lib/definitions/index';
-import { getMediaIcon } from '@/lib/utils';
-import Image from 'next/image';
+import React, { useState, useEffect, useRef } from 'react'
+import { X, Star, Calendar, Save } from 'lucide-react'
+import { Media, Ranking } from '@/lib/definitions/index'
+import { getMediaIcon } from '@/lib/utils'
+import Image from 'next/image'
 
 interface AddRankingModalProps {
-  media?: Media;
-  onSave: (ranking: Ranking) => void;
-  onClose: () => void;
-  existingRanking?: Ranking;
+  media?: Media
+  onSave: (ranking: Ranking) => void
+  onClose: () => void
+  existingRanking?: Ranking
 }
 
 const ratingDescriptions = [
-  { rating: 1, text: "Not for me", emoji: "😞" },
-  { rating: 2, text: "It was okay", emoji: "😐" },
-  { rating: 3, text: "Pretty good", emoji: "🙂" },
-  { rating: 4, text: "Really enjoyed it", emoji: "😊" },
-  { rating: 5, text: "Absolutely loved it!", emoji: "🤩" }
-];
+  { rating: 1, text: 'Not for me', emoji: '😞' },
+  { rating: 2, text: 'It was okay', emoji: '😐' },
+  { rating: 3, text: 'Pretty good', emoji: '🙂' },
+  { rating: 4, text: 'Really enjoyed it', emoji: '😊' },
+  { rating: 5, text: 'Absolutely loved it!', emoji: '🤩' },
+]
 
 const quickNotes = [
-  "Great story",
-  "Amazing visuals",
-  "Compelling characters",
-  "Slow pacing",
-  "Highly recommend",
-  "Not what I expected",
-  "Instant classic",
-  "Worth the hype"
-];
+  'Great story',
+  'Amazing visuals',
+  'Compelling characters',
+  'Slow pacing',
+  'Highly recommend',
+  'Not what I expected',
+  'Instant classic',
+  'Worth the hype',
+]
 
 export const AddRankingModal = ({
   media,
   onSave,
   onClose,
-  existingRanking
+  existingRanking,
 }: AddRankingModalProps): React.ReactElement => {
-  const [rankValue, setRankValue] = useState(existingRanking?.rank || 3);
-  const [notes, setNotes] = useState(existingRanking?.notes || '');
-  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const notesRef = useRef<HTMLTextAreaElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [rankValue, setRankValue] = useState(existingRanking?.rank || 3)
+  const [notes, setNotes] = useState(existingRanking?.notes || '')
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const notesRef = useRef<HTMLTextAreaElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
 
-  const Icon = getMediaIcon(media?.type || 'movie');
-  const currentRating = hoveredStar || rankValue;
-  const ratingInfo = ratingDescriptions.find(r => r.rating === currentRating);
+  const Icon = getMediaIcon(media?.type || 'movie')
+  const currentRating = hoveredStar || rankValue
+  const ratingInfo = ratingDescriptions.find((r) => r.rating === currentRating)
 
   useEffect(() => {
     // Focus trap
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onClose()
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   useEffect(() => {
     // Animate in
-    setIsAnimating(true);
-  }, []);
+    setIsAnimating(true)
+  }, [])
 
   const handleSave = () => {
     const newRanking: Ranking = {
@@ -70,29 +70,29 @@ export const AddRankingModal = ({
       mediaId: media?.id || '',
       media: media,
       rank: rankValue,
-      notes: notes.trim()
-    };
+      notes: notes.trim(),
+    }
 
     // Animate out before saving
-    setIsAnimating(false);
+    setIsAnimating(false)
     setTimeout(() => {
-      onSave(newRanking);
-    }, 200);
-  };
+      onSave(newRanking)
+    }, 200)
+  }
 
   const handleQuickNote = (note: string) => {
-    setNotes(prev => {
-      const trimmed = prev.trim();
-      return trimmed ? `${trimmed}. ${note}` : note;
-    });
-    notesRef.current?.focus();
-  };
+    setNotes((prev) => {
+      const trimmed = prev.trim()
+      return trimmed ? `${trimmed}. ${note}` : note
+    })
+    notesRef.current?.focus()
+  }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   return (
     <div
@@ -148,7 +148,9 @@ export const AddRankingModal = ({
                   </>
                 )}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 my-2">{media?.overview}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 my-2">
+                {media?.overview}
+              </p>
             </div>
           </div>
         </div>
@@ -237,7 +239,10 @@ export const AddRankingModal = ({
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
               <span>
-                {existingRanking?.updatedAt ? 'Updated' : 'Added'} on {existingRanking?.updatedAt ? existingRanking?.updatedAt?.toDate().toLocaleDateString() : existingRanking?.createdAt?.toDate().toLocaleDateString()}
+                {existingRanking?.updatedAt ? 'Updated' : 'Added'} on{' '}
+                {existingRanking?.updatedAt
+                  ? existingRanking?.updatedAt?.toDate().toLocaleDateString()
+                  : existingRanking?.createdAt?.toDate().toLocaleDateString()}
               </span>
             </div>
           )}
@@ -261,5 +266,5 @@ export const AddRankingModal = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

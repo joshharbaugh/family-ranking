@@ -1,5 +1,5 @@
-import FamilyPageSkeleton from '@/app/ui/skeletons';
+import FamilyPageSkeleton from '@/app/ui/skeletons'
 
 export default function Loading() {
-  return <FamilyPageSkeleton />;
+  return <FamilyPageSkeleton />
 }

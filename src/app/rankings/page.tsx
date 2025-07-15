@@ -1,103 +1,111 @@
-"use client";
+'use client'
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react';
-import { Media, Ranking } from '@/lib/definitions/index';
-import { UserStats } from '@/lib/definitions/user';
-import { getMediaIcon } from '@/lib/utils';
-import { useRankings } from '@/app/hooks/useRankings';
-import UISelect from '@/app/ui/select';
-import Image from 'next/image';
-import { AddRankingModal } from '@/app/ui/modals/add-ranking';
-import { RankingsSkeleton } from '@/app/ui/skeletons';
+import React, { useState, useMemo, useEffect } from 'react'
+import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react'
+import { Media, Ranking } from '@/lib/definitions/index'
+import { UserStats } from '@/lib/definitions/user'
+import { getMediaIcon } from '@/lib/utils'
+import { useRankings } from '@/app/hooks/useRankings'
+import UISelect from '@/app/ui/select'
+import Image from 'next/image'
+import { AddRankingModal } from '@/app/ui/modals/add-ranking'
+import { RankingsSkeleton } from '@/app/ui/skeletons'
 
-type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title';
-type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game';
+type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title'
+type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game'
 
 const RankingsPage = (): React.ReactNode => {
-  const { addRanking, deleteRanking, getUserStats, rankings } = useRankings();
-  const [sortBy, setSortBy] = useState<SortOption>('rank-desc');
-  const [filterBy, setFilterBy] = useState<FilterOption>('all');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
-  const [existingRanking, setExistingRanking] = useState<Ranking | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { addRanking, deleteRanking, getUserStats, rankings } = useRankings()
+  const [sortBy, setSortBy] = useState<SortOption>('rank-desc')
+  const [filterBy, setFilterBy] = useState<FilterOption>('all')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
+    null
+  )
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null)
+  const [existingRanking, setExistingRanking] = useState<Ranking | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Sort and filter rankings
   const processedRankings = useMemo(() => {
-    let filtered = [...rankings];
+    let filtered = [...rankings]
 
     // Apply filter
     if (filterBy !== 'all') {
-      filtered = filtered.filter(r => r.media?.type === filterBy);
+      filtered = filtered.filter((r) => r.media?.type === filterBy)
     }
 
     // Apply sort
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'rank-desc':
-          return b.rank - a.rank;
+          return b.rank - a.rank
         case 'rank-asc':
-          return a.rank - b.rank;
+          return a.rank - b.rank
         case 'date-desc':
-          return (b.createdAt?.toDate().getTime() ?? 0) - (a.createdAt?.toDate().getTime() ?? 0);
+          return (
+            (b.createdAt?.toDate().getTime() ?? 0) -
+            (a.createdAt?.toDate().getTime() ?? 0)
+          )
         case 'date-asc':
-          return (a.createdAt?.toDate().getTime() ?? 0) - (b.createdAt?.toDate().getTime() ?? 0);
+          return (
+            (a.createdAt?.toDate().getTime() ?? 0) -
+            (b.createdAt?.toDate().getTime() ?? 0)
+          )
         case 'title':
-          return a.media?.title.localeCompare(b.media?.title || '') || 0;
+          return a.media?.title.localeCompare(b.media?.title || '') || 0
         default:
-          return 0;
+          return 0
       }
-    });
+    })
 
-    return filtered;
-  }, [rankings, sortBy, filterBy]);
+    return filtered
+  }, [rankings, sortBy, filterBy])
 
   const sortItems = [
     { label: 'Highest Rated', value: 'rank-desc' },
     { label: 'Lowest Rated', value: 'rank-asc' },
     { label: 'Recently Added', value: 'date-desc' },
     { label: 'Oldest First', value: 'date-asc' },
-    { label: 'Title A-Z', value: 'title' }
-  ];
+    { label: 'Title A-Z', value: 'title' },
+  ]
 
   // Get user stats
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const userStats = await getUserStats();
-        setStats(userStats);
-        setLoading(false);
+        const userStats = await getUserStats()
+        setStats(userStats)
+        setLoading(false)
       } catch (error) {
-        console.error('Error fetching user stats:', error);
+        console.error('Error fetching user stats:', error)
       }
-    };
+    }
 
-    fetchStats();
-  }, [getUserStats, rankings]);
+    fetchStats()
+  }, [getUserStats, rankings])
 
   const handleDelete = (id: string) => {
-    deleteRanking(id);
-    setShowDeleteConfirm(null);
-  };
+    deleteRanking(id)
+    setShowDeleteConfirm(null)
+  }
 
   const handleEdit = (ranking: Ranking) => {
-    setExistingRanking(ranking);
-    setShowAddModal(true);
-  };
+    setExistingRanking(ranking)
+    setShowAddModal(true)
+  }
 
   const handleSave = (ranking: Ranking) => {
-    addRanking(ranking.rank, ranking.notes, ranking.media);
-    setShowAddModal(false);
-    setSelectedMedia(null);
-    setExistingRanking(null);
-  };
+    addRanking(ranking.rank, ranking.notes, ranking.media)
+    setShowAddModal(false)
+    setSelectedMedia(null)
+    setExistingRanking(null)
+  }
 
   // TODO: Add Skeleton Loader
   if (loading || !stats) {
-    return <RankingsSkeleton />;
+    return <RankingsSkeleton />
   }
 
   if (rankings.length === 0) {
@@ -110,10 +118,11 @@ const RankingsPage = (): React.ReactNode => {
           No rankings yet!
         </h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Search for your favorite movies, TV shows, books, and games to start building your personal rankings.
+          Search for your favorite movies, TV shows, books, and games to start
+          building your personal rankings.
         </p>
       </div>
-    );
+    )
   }
 
   return (
@@ -123,9 +132,9 @@ const RankingsPage = (): React.ReactNode => {
           media={selectedMedia || existingRanking?.media}
           onSave={handleSave}
           onClose={() => {
-            setShowAddModal(false);
-            setSelectedMedia(null);
-            setExistingRanking(null);
+            setShowAddModal(false)
+            setSelectedMedia(null)
+            setExistingRanking(null)
           }}
           existingRanking={existingRanking || undefined}
         />
@@ -142,19 +151,25 @@ const RankingsPage = (): React.ReactNode => {
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {rankings.length}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Total</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Total
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats?.avgRating ?? 0}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Avg Rating</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Avg Rating
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats?.movieCount ?? 0}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Movies</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Movies
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
@@ -166,13 +181,17 @@ const RankingsPage = (): React.ReactNode => {
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats?.bookCount ?? 0}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Books</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Books
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats?.gameCount ?? 0}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Games</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Games
+              </div>
             </div>
           </div>
         </div>
@@ -254,7 +273,7 @@ const RankingsPage = (): React.ReactNode => {
         {/* Rankings List */}
         <div className="grid gap-4">
           {processedRankings.map((ranking, index) => {
-            const Icon = getMediaIcon(ranking.media?.type || 'movie');
+            const Icon = getMediaIcon(ranking.media?.type || 'movie')
 
             return (
               <div
@@ -264,12 +283,14 @@ const RankingsPage = (): React.ReactNode => {
                 <div className="flex items-start gap-4">
                   {/* Rank Number (for top 3) */}
                   {sortBy === 'rank-desc' && index < 3 && (
-                    <div className={`
+                    <div
+                      className={`
                       flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm
                       ${index === 0 ? 'bg-yellow-400 text-yellow-900' : ''}
                       ${index === 1 ? 'bg-gray-300 text-gray-700' : ''}
                       ${index === 2 ? 'bg-orange-400 text-orange-900' : ''}
-                    `}>
+                    `}
+                    >
                       {index + 1}
                     </div>
                   )}
@@ -288,7 +309,9 @@ const RankingsPage = (): React.ReactNode => {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                          <span className="text-ellipsis line-clamp-1">{ranking.media?.title}</span>
+                          <span className="text-ellipsis line-clamp-1">
+                            {ranking.media?.title}
+                          </span>
                           <Icon className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                         </h3>
 
@@ -365,12 +388,12 @@ const RankingsPage = (): React.ReactNode => {
                   </div>
                 </div>
               </div>
-            );
+            )
           })}
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default RankingsPage;
+export default RankingsPage

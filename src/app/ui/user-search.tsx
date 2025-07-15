@@ -1,97 +1,91 @@
-import React, { useState } from 'react';
-import { useUserSearch } from '@/app/hooks/useUserSearch';
-import { Search, User, Mail, Sparkles, Clock, X } from 'lucide-react';
-import { UserProfile } from '@/lib/definitions/user';
-import Image from 'next/image';
+import React, { useState } from 'react'
+import { useUserSearch } from '@/app/hooks/useUserSearch'
+import { Search, User, Mail, Sparkles, Clock, X } from 'lucide-react'
+import { UserProfile } from '@/lib/definitions/user'
+import Image from 'next/image'
 
 interface UserSearchProps {
-  currentUserId: string;
-  onUserSelect?: (user: UserProfile) => void;
-  placeholder?: string;
-  className?: string;
-  showSuggestions?: boolean;
-  maxResults?: number;
+  currentUserId: string
+  onUserSelect?: (user: UserProfile) => void
+  placeholder?: string
+  className?: string
+  showSuggestions?: boolean
+  maxResults?: number
 }
 
 interface SearchResult extends UserProfile {
-  _score?: number;
-  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial';
+  _score?: number
+  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial'
 }
 
 export function UserSearch({
   currentUserId,
   onUserSelect,
-  placeholder = "Search users...",
-  className = "",
+  placeholder = 'Search users...',
+  className = '',
   showSuggestions = true,
-  maxResults = 10
+  maxResults = 10,
 }: UserSearchProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('')
 
-  const {
-    results,
-    loading,
-    error,
-    search,
-    clearResults,
-    suggestions
-  } = useUserSearch({
-    debounceMs: 300,
-    minSearchLength: 2,
-    maxResults
-  });
+  const { results, loading, error, search, clearResults, suggestions } =
+    useUserSearch({
+      debounceMs: 300,
+      minSearchLength: 2,
+      maxResults,
+    })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQuery(value);
+    const value = e.target.value
+    setQuery(value)
 
     if (value.trim()) {
-      search(value);
+      search(value)
     } else {
-      clearResults();
+      clearResults()
     }
-  };
+  }
 
   const handleUserSelect = (user: UserProfile) => {
-    console.log('handleUserSelect', user);
+    console.log('handleUserSelect', user)
     if (user.uid === currentUserId) {
-      return;
+      return
     }
-    onUserSelect?.(user);
-    setQuery('');
-    clearResults();
-  };
+    onUserSelect?.(user)
+    setQuery('')
+    clearResults()
+  }
 
   const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    search(suggestion);
-  };
+    setQuery(suggestion)
+    search(suggestion)
+  }
 
   const getRelevanceIcon = (relevance: SearchResult['relevance']) => {
     switch (relevance) {
       case 'exact':
-        return <Sparkles className="w-4 h-4 text-green-500" />;
+        return <Sparkles className="w-4 h-4 text-green-500" />
       case 'prefix':
-        return <Search className="w-4 h-4 text-blue-500" />;
+        return <Search className="w-4 h-4 text-blue-500" />
       case 'fuzzy':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
+        return <Clock className="w-4 h-4 text-yellow-500" />
       default:
-        return <User className="w-4 h-4 text-gray-500" />;
+        return <User className="w-4 h-4 text-gray-500" />
     }
-  };
+  }
 
   const getRelevanceText = (relevance: SearchResult['relevance']) => {
     switch (relevance) {
       case 'exact':
-        return 'Exact match';
+        return 'Exact match'
       case 'prefix':
-        return 'Starts with';
+        return 'Starts with'
       case 'fuzzy':
-        return 'Similar match';
+        return 'Similar match'
       default:
-        return 'Contains';
+        return 'Contains'
     }
-  };
+  }
 
   return (
     <div className={`relative ${className}`}>
@@ -108,8 +102,8 @@ export function UserSearch({
         {query && (
           <button
             onClick={() => {
-              setQuery('');
-              clearResults();
+              setQuery('')
+              clearResults()
             }}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
@@ -166,7 +160,13 @@ export function UserSearch({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {user.displayName} {user.uid === currentUserId && <span className="text-xs text-gray-500 dark:text-gray-400"> (You)</span>}
+                      {user.displayName}{' '}
+                      {user.uid === currentUserId && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {' '}
+                          (You)
+                        </span>
+                      )}
                     </span>
                     {user.relevance && (
                       <div className="flex items-center space-x-1">
@@ -209,31 +209,40 @@ export function UserSearch({
       )}
 
       {/* Suggestions */}
-      {showSuggestions && suggestions.length > 0 && results.length === 0 && !loading && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-          <div className="p-2">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-2">Suggestions:</div>
-            {suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
-              >
-                {suggestion}
+      {showSuggestions &&
+        suggestions.length > 0 &&
+        results.length === 0 &&
+        !loading && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+            <div className="p-2">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-2">
+                Suggestions:
               </div>
-            ))}
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* No Results */}
-      {!loading && results.length === 0 && suggestions.length === 0 && query.trim().length >= 2 && !error && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-          <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
-            No users found for `{query}`
+      {!loading &&
+        results.length === 0 &&
+        suggestions.length === 0 &&
+        query.trim().length >= 2 &&
+        !error && (
+          <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+            <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
+              No users found for `{query}`
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
-  );
+  )
 }

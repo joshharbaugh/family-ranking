@@ -1,121 +1,126 @@
-"use client";
+'use client'
 
-import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { auth, googleProvider } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { AlertCircle, Mail, User, Eye, EyeOff, Lock, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { auth, googleProvider } from '@/lib/firebase'
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from 'firebase/auth'
+import { AlertCircle, Mail, User, Eye, EyeOff, Lock, X } from 'lucide-react'
 
-type AuthMode = 'login' | 'signup' | 'reset';
+type AuthMode = 'login' | 'signup' | 'reset'
 
 interface LoginModalProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 const LoginModal = ({ onClose }: LoginModalProps) => {
-  const [mode, setMode] = useState<AuthMode>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [localError, setLocalError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<AuthMode>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [localError, setLocalError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
 
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
     // Clear errors when switching modes
-    setLocalError('');
-    setSuccessMessage('');
-  }, [mode]);
+    setLocalError('')
+    setSuccessMessage('')
+  }, [mode])
 
   useEffect(() => {
     // Focus trap
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onClose()
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   useEffect(() => {
     // Animate in
-    setIsAnimating(true);
-  }, []);
+    setIsAnimating(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError('');
-    setSuccessMessage('');
-    setIsSubmitting(true);
+    e.preventDefault()
+    setLocalError('')
+    setSuccessMessage('')
+    setIsSubmitting(true)
 
     try {
       if (mode === 'signup') {
         if (password !== confirmPassword) {
-          setLocalError('Passwords do not match');
-          setIsSubmitting(false);
-          return;
+          setLocalError('Passwords do not match')
+          setIsSubmitting(false)
+          return
         }
         if (!displayName.trim()) {
-          setLocalError('Please enter your name');
-          setIsSubmitting(false);
-          return;
+          setLocalError('Please enter your name')
+          setIsSubmitting(false)
+          return
         }
-        await createUserWithEmailAndPassword(auth, email, password);
-        router.push("/search");
+        await createUserWithEmailAndPassword(auth, email, password)
+        router.push('/search')
       } else if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
-        router.push("/search");
+        await signInWithEmailAndPassword(auth, email, password)
+        router.push('/search')
       } else if (mode === 'reset') {
-        await sendPasswordResetEmail(auth, email);
-        setSuccessMessage('Password reset email sent! Check your inbox.');
-        setEmail('');
+        await sendPasswordResetEmail(auth, email)
+        setSuccessMessage('Password reset email sent! Check your inbox.')
+        setEmail('')
       }
     } catch (err) {
-      console.error('Error submitting form:', err);
+      console.error('Error submitting form:', err)
       if (err instanceof Error) {
-        setLocalError(err.message);
+        setLocalError(err.message)
       } else {
-        setLocalError("An unknown error occurred.");
+        setLocalError('An unknown error occurred.')
       }
     } finally {
-      setIsSubmitting(false);
-      onClose();
+      setIsSubmitting(false)
+      onClose()
     }
-  };
+  }
 
   const handleGoogleSignIn = async () => {
-    setLocalError('');
+    setLocalError('')
 
     try {
-      setIsSubmitting(true);
-      await signInWithPopup(auth, googleProvider);
-      router.push("/search");
+      setIsSubmitting(true)
+      await signInWithPopup(auth, googleProvider)
+      router.push('/search')
     } catch (err) {
-      console.error('Google sign-in failed:', err);
+      console.error('Google sign-in failed:', err)
       if (err instanceof Error) {
-        setLocalError(err.message);
+        setLocalError(err.message)
       } else {
-        setLocalError("An unknown error occurred.");
+        setLocalError('An unknown error occurred.')
       }
     } finally {
-      setIsSubmitting(false);
-      onClose();
+      setIsSubmitting(false)
+      onClose()
     }
-  };
+  }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   return (
     <div
@@ -180,7 +185,10 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
               {/* Name field (signup only) */}
               {mode === 'signup' && (
                 <div>
-                  <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="displayName"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Name
                   </label>
                   <div className="mt-1 relative">
@@ -204,7 +212,10 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
 
               {/* Email field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Email address
                 </label>
                 <div className="mt-1 relative">
@@ -228,7 +239,10 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
               {/* Password field */}
               {mode !== 'reset' && (
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Password
                   </label>
                   <div className="mt-1 relative">
@@ -239,12 +253,18 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
-                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      autoComplete={
+                        mode === 'login' ? 'current-password' : 'new-password'
+                      }
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 pr-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder={mode === 'signup' ? 'At least 6 characters' : 'Enter your password'}
+                      placeholder={
+                        mode === 'signup'
+                          ? 'At least 6 characters'
+                          : 'Enter your password'
+                      }
                     />
                     <button
                       type="button"
@@ -264,7 +284,10 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
               {/* Confirm password field (signup only) */}
               {mode === 'signup' && (
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Confirm Password
                   </label>
                   <div className="mt-1 relative">
@@ -305,11 +328,13 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
                 disabled={isSubmitting}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Please wait...' : (
-                  mode === 'login' ? 'Sign in' :
-                  mode === 'signup' ? 'Create account' :
-                  'Send reset email'
-                )}
+                {isSubmitting
+                  ? 'Please wait...'
+                  : mode === 'login'
+                    ? 'Sign in'
+                    : mode === 'signup'
+                      ? 'Create account'
+                      : 'Send reset email'}
               </button>
             </form>
 
@@ -322,7 +347,9 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
                       <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">Or continue with</span>
+                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+                        Or continue with
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -362,7 +389,7 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginModal;
+export default LoginModal

@@ -1,76 +1,82 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { Users, Settings, Plus, User } from 'lucide-react';
-import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family';
-import { useFamilyStore } from '@/app/store/family-store';
-import { UpdateFamilyModal } from '@/app/ui/modals/update-family';
-import { AddFamilyMemberModal } from '@/app/ui/modals/add-family-member';
-import Image from 'next/image';
+import React, { useEffect, useState } from 'react'
+import { Users, Settings, Plus, User } from 'lucide-react'
+import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
+import { useFamilyStore } from '@/app/store/family-store'
+import { UpdateFamilyModal } from '@/app/ui/modals/update-family'
+import { AddFamilyMemberModal } from '@/app/ui/modals/add-family-member'
+import Image from 'next/image'
 
 interface FamilyOverviewProps {
-  family: Family;
-  currentUserId: string;
+  family: Family
+  currentUserId: string
 }
 
 const getRoleIcon = (role: FamilyRole) => {
   switch (role) {
     case 'parent':
     case 'guardian':
-      return '👨‍👩‍👧‍👦';
+      return '👨‍👩‍👧‍👦'
     case 'child':
-      return '👶';
+      return '👶'
     case 'grandmother':
     case 'grandfather':
-      return '👴👵';
+      return '👴👵'
     case 'aunt':
     case 'uncle':
-      return '👨‍👩‍👧‍👦';
+      return '👨‍👩‍👧‍👦'
     case 'cousin':
-      return '👥';
+      return '👥'
     case 'sibling':
-      return '👫';
+      return '👫'
     default:
-      return '👤';
+      return '👤'
   }
-};
+}
 
 const getRoleLabel = (role: FamilyRole) => {
   switch (role) {
     case 'parent':
-      return 'Parent';
+      return 'Parent'
     case 'guardian':
-      return 'Guardian';
+      return 'Guardian'
     case 'child':
-      return 'Child';
+      return 'Child'
     case 'grandmother':
-      return 'Grandmother';
+      return 'Grandmother'
     case 'grandfather':
-      return 'Grandfather';
+      return 'Grandfather'
     case 'aunt':
-      return 'Aunt';
+      return 'Aunt'
     case 'uncle':
-      return 'Uncle';
+      return 'Uncle'
     case 'cousin':
-      return 'Cousin';
+      return 'Cousin'
     case 'sibling':
-      return 'Sibling';
+      return 'Sibling'
     default:
-      return 'Other';
+      return 'Other'
   }
-};
+}
 
-const FamilyOverview: React.FC<FamilyOverviewProps> = ({ family, currentUserId }) => {
-  const { familyMembers, fetchFamilyMembersWithDetails } = useFamilyStore();
-  const [showUpdateFamilyModal, setShowUpdateFamilyModal] = useState(false);
-  const [showAddFamilyMemberModal, setShowAddFamilyMemberModal] = useState(false);
+const FamilyOverview: React.FC<FamilyOverviewProps> = ({
+  family,
+  currentUserId,
+}) => {
+  const { familyMembers, fetchFamilyMembersWithDetails } = useFamilyStore()
+  const [showUpdateFamilyModal, setShowUpdateFamilyModal] = useState(false)
+  const [showAddFamilyMemberModal, setShowAddFamilyMemberModal] =
+    useState(false)
 
-  const isCreator = family.createdBy === currentUserId;
-  const isParent = familyMembers.some(member => member.userId === currentUserId && member.role === 'parent');
+  const isCreator = family.createdBy === currentUserId
+  const isParent = familyMembers.some(
+    (member) => member.userId === currentUserId && member.role === 'parent'
+  )
 
   useEffect(() => {
-    if (family.id) fetchFamilyMembersWithDetails(family.id);
-  }, [family.id, fetchFamilyMembersWithDetails]);
+    if (family.id) fetchFamilyMembersWithDetails(family.id)
+  }, [family.id, fetchFamilyMembersWithDetails])
 
   return (
     <div className="space-y-6">
@@ -107,7 +113,12 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({ family, currentUserId }
             <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
               <span>{family.memberIds.length} members</span>
               <span>•</span>
-              <span>Created {family.createdAt?.toDate?.() ? family.createdAt.toDate().toLocaleDateString() : 'Recently'}</span>
+              <span>
+                Created{' '}
+                {family.createdAt?.toDate?.()
+                  ? family.createdAt.toDate().toLocaleDateString()
+                  : 'Recently'}
+              </span>
             </div>
           </div>
 
@@ -191,11 +202,13 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({ family, currentUserId }
 
               {/* Status */}
               <div className="flex-shrink-0">
-                <div className={`w-3 h-3 rounded-full ${
-                  member.isActive
-                    ? 'bg-green-500'
-                    : 'bg-gray-300 dark:bg-gray-600'
-                }`} />
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    member.isActive
+                      ? 'bg-green-500'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                />
               </div>
             </div>
           ))}
@@ -210,20 +223,32 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({ family, currentUserId }
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${
-              family.settings.allowChildRankings ? 'bg-green-500' : 'bg-red-500'
-            }`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                family.settings.allowChildRankings
+                  ? 'bg-green-500'
+                  : 'bg-red-500'
+              }`}
+            />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Child rankings {family.settings.allowChildRankings ? 'enabled' : 'disabled'}
+              Child rankings{' '}
+              {family.settings.allowChildRankings ? 'enabled' : 'disabled'}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${
-              family.settings.requireParentApproval ? 'bg-green-500' : 'bg-red-500'
-            }`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                family.settings.requireParentApproval
+                  ? 'bg-green-500'
+                  : 'bg-red-500'
+              }`}
+            />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Parent approval {family.settings.requireParentApproval ? 'required' : 'not required'}
+              Parent approval{' '}
+              {family.settings.requireParentApproval
+                ? 'required'
+                : 'not required'}
             </span>
           </div>
 
@@ -236,7 +261,7 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({ family, currentUserId }
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FamilyOverview;
+export default FamilyOverview

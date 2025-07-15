@@ -1,159 +1,172 @@
-"use client";
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import { UserService } from '@/app/services/user-service';
-import { UserProfile } from '@/lib/definitions/user';
+import { useState, useEffect, useCallback } from 'react'
+import { UserService } from '@/app/services/user-service'
+import { UserProfile } from '@/lib/definitions/user'
 
 interface UseUserSearchOptions {
-  debounceMs?: number;
-  minSearchLength?: number;
-  maxResults?: number;
+  debounceMs?: number
+  minSearchLength?: number
+  maxResults?: number
 }
 
 interface SearchResult extends UserProfile {
-  _score?: number;
-  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial';
+  _score?: number
+  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial'
 }
 
 interface UseUserSearchReturn {
-  results: SearchResult[];
-  loading: boolean;
-  error: string | null;
-  search: (query: string) => void;
-  clearResults: () => void;
-  suggestions: string[];
+  results: SearchResult[]
+  loading: boolean
+  error: string | null
+  search: (query: string) => void
+  clearResults: () => void
+  suggestions: string[]
 }
 
-export function useUserSearch(options: UseUserSearchOptions = {}): UseUserSearchReturn {
-  const {
-    debounceMs = 300,
-    minSearchLength = 2,
-    maxResults = 10
-  } = options;
+export function useUserSearch(
+  options: UseUserSearchOptions = {}
+): UseUserSearchReturn {
+  const { debounceMs = 300, minSearchLength = 2, maxResults = 10 } = options
 
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  )
 
   const clearResults = useCallback(() => {
-    setResults([]);
-    setSuggestions([]);
-    setError(null);
-  }, []);
+    setResults([])
+    setSuggestions([])
+    setError(null)
+  }, [])
 
-  const search = useCallback(async (query: string) => {
-    setLoading(true);
+  const search = useCallback(
+    async (query: string) => {
+      setLoading(true)
 
-    // Clear previous timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    // Clear results if query is empty
-    if (!query || query.trim().length === 0) {
-      clearResults();
-      setLoading(false);
-      return;
-    }
-
-    // Set up debounced search
-    const timeout = setTimeout(async () => {
-      // Check minimum length
-      if (query.trim().length < minSearchLength) {
-        setError(`Search query must be at least ${minSearchLength} characters`);
-        setLoading(false);
-        return;
+      // Clear previous timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout)
       }
 
-      setError(null);
+      // Clear results if query is empty
+      if (!query || query.trim().length === 0) {
+        clearResults()
+        setLoading(false)
+        return
+      }
 
-      try {
-        try {
-          // Hydrate the search index
-          await UserService.updateAllUsersForSearch();
-        } catch (error) {
-          console.error('Error hydrating search index:', error);
+      // Set up debounced search
+      const timeout = setTimeout(async () => {
+        // Check minimum length
+        if (query.trim().length < minSearchLength) {
+          setError(
+            `Search query must be at least ${minSearchLength} characters`
+          )
+          setLoading(false)
+          return
         }
 
-        console.log('User Search', query);
+        setError(null)
 
-        const searchTerm = query.trim();
-
-        // Get search results
-        const searchResults = await UserService.getUsersByName(searchTerm, maxResults);
-
-        // Get suggestions for autocomplete
-        const searchSuggestions = await UserService.suggestUsers(searchTerm, 5);
-
-        // Process and score results
-        const processedResults: SearchResult[] = searchResults.map(user => {
-          const displayNameLower = user.displayName.toLowerCase();
-          const searchTermLower = searchTerm.toLowerCase();
-
-          let relevance: SearchResult['relevance'] = 'partial';
-          let score = 0;
-
-          // Determine relevance and score
-          if (displayNameLower === searchTermLower) {
-            relevance = 'exact';
-            score = 100;
-          } else if (displayNameLower.startsWith(searchTermLower)) {
-            relevance = 'prefix';
-            score = 80;
-          } else if (displayNameLower.includes(searchTermLower)) {
-            relevance = 'partial';
-            score = 60;
-          } else {
-            // Fuzzy match (handled by Elasticsearch)
-            relevance = 'fuzzy';
-            score = 40;
+        try {
+          try {
+            // Hydrate the search index
+            await UserService.updateAllUsersForSearch()
+          } catch (error) {
+            console.error('Error hydrating search index:', error)
           }
 
-          // Boost score if user has a profile picture
-          if (user.photoURL) {
-            score += 5;
-          }
+          console.log('User Search', query)
 
-          // Boost score if user has a bio
-          if (user.bio) {
-            score += 3;
-          }
+          const searchTerm = query.trim()
 
-          return {
-            ...user,
-            _score: score,
-            relevance
-          };
-        });
+          // Get search results
+          const searchResults = await UserService.getUsersByName(
+            searchTerm,
+            maxResults
+          )
 
-        // Sort by score (highest first)
-        processedResults.sort((a, b) => (b._score || 0) - (a._score || 0));
+          // Get suggestions for autocomplete
+          const searchSuggestions = await UserService.suggestUsers(
+            searchTerm,
+            5
+          )
 
-        setResults(processedResults);
-        setSuggestions(searchSuggestions);
-      } catch (err) {
-        console.error('Search error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to search users');
-        setResults([]);
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
-      }
-    }, debounceMs);
+          // Process and score results
+          const processedResults: SearchResult[] = searchResults.map((user) => {
+            const displayNameLower = user.displayName.toLowerCase()
+            const searchTermLower = searchTerm.toLowerCase()
 
-    setSearchTimeout(timeout);
-  }, [debounceMs, minSearchLength, maxResults, searchTimeout, clearResults]);
+            let relevance: SearchResult['relevance'] = 'partial'
+            let score = 0
+
+            // Determine relevance and score
+            if (displayNameLower === searchTermLower) {
+              relevance = 'exact'
+              score = 100
+            } else if (displayNameLower.startsWith(searchTermLower)) {
+              relevance = 'prefix'
+              score = 80
+            } else if (displayNameLower.includes(searchTermLower)) {
+              relevance = 'partial'
+              score = 60
+            } else {
+              // Fuzzy match (handled by Elasticsearch)
+              relevance = 'fuzzy'
+              score = 40
+            }
+
+            // Boost score if user has a profile picture
+            if (user.photoURL) {
+              score += 5
+            }
+
+            // Boost score if user has a bio
+            if (user.bio) {
+              score += 3
+            }
+
+            return {
+              ...user,
+              _score: score,
+              relevance,
+            }
+          })
+
+          // Sort by score (highest first)
+          processedResults.sort((a, b) => (b._score || 0) - (a._score || 0))
+
+          setResults(processedResults)
+          setSuggestions(searchSuggestions)
+        } catch (err) {
+          console.error('Search error:', err)
+          setError(
+            err instanceof Error ? err.message : 'Failed to search users'
+          )
+          setResults([])
+          setSuggestions([])
+        } finally {
+          setLoading(false)
+        }
+      }, debounceMs)
+
+      setSearchTimeout(timeout)
+    },
+    [debounceMs, minSearchLength, maxResults, searchTimeout, clearResults]
+  )
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeout) {
-        clearTimeout(searchTimeout);
+        clearTimeout(searchTimeout)
       }
-    };
-  }, [searchTimeout]);
+    }
+  }, [searchTimeout])
 
   return {
     results,
@@ -161,6 +174,6 @@ export function useUserSearch(options: UseUserSearchOptions = {}): UseUserSearch
     error,
     search,
     clearResults,
-    suggestions
-  };
+    suggestions,
+  }
 }

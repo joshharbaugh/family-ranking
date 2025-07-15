@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp, getApps, getApp } from 'firebase/app'
+import { getAuth, GoogleAuthProvider } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 
 // Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -12,19 +12,19 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
-};
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID,
+}
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
 
 // Initialize services
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const auth = getAuth(app)
+const db = getFirestore(app)
+const storage = getStorage(app)
 
 // Auth providers
-const googleProvider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider()
 
 // TODO : Enable offline persistence
 // enableIndexedDbPersistence(db).catch((err) => {
@@ -37,7 +37,7 @@ const googleProvider = new GoogleAuthProvider();
 //   }
 // });
 
-export { auth, db, googleProvider, storage };
+export { auth, db, googleProvider, storage }
 
 // Helper to check if we're in development
-export const isDev = process.env.NODE_ENV === 'development';
+export const isDev = process.env.NODE_ENV === 'development'

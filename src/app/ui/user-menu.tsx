@@ -1,60 +1,65 @@
-"use client";
+'use client'
 
-import { useState, useRef, useEffect } from 'react';
-import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
-import { useAuth } from '@/app/hooks/useAuth';
-import { useUserStore } from '@/app/store/user-store';
-import { UserService } from '@/app/services/user-service';
-import { UserProfile } from '@/lib/definitions/user';
-import { getInitials } from '@/lib/utils';
-import LoginModal from '@/app/ui/modals/login';
-import { UserSettingsModal } from '@/app/ui/modals/user-settings';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react'
+import { User, LogOut, Settings, ChevronDown } from 'lucide-react'
+import { useAuth } from '@/app/hooks/useAuth'
+import { useUserStore } from '@/app/store/user-store'
+import { UserService } from '@/app/services/user-service'
+import { UserProfile } from '@/lib/definitions/user'
+import { getInitials } from '@/lib/utils'
+import LoginModal from '@/app/ui/modals/login'
+import { UserSettingsModal } from '@/app/ui/modals/user-settings'
+import { useRouter } from 'next/navigation'
 
 export function UserMenu() {
-  const { logout } = useAuth();
-  const { user, userProfile, updateUserProfile, logout: logoutUserStore } = useUserStore();
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const { logout } = useAuth()
+  const {
+    user,
+    userProfile,
+    updateUserProfile,
+    logout: logoutUserStore,
+  } = useUserStore()
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
+        setShowUserMenu(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSaveSettings = async (updates: Partial<UserProfile>) => {
-    if (!userProfile) return;
+    if (!userProfile) return
     try {
-      await UserService.updateUserProfile(userProfile.uid, updates);
-      updateUserProfile({ ...userProfile, ...updates });
+      await UserService.updateUserProfile(userProfile.uid, updates)
+      updateUserProfile({ ...userProfile, ...updates })
     } catch (error) {
-      console.error('Failed to update settings:', error);
+      console.error('Failed to update settings:', error)
     }
-  };
+  }
 
   const handleLogin = () => {
-    setShowLoginModal(true);
-  };
+    setShowLoginModal(true)
+  }
 
   const handleLogout = async () => {
     try {
-      await logout();
-      logoutUserStore();
+      await logout()
+      logoutUserStore()
       // Redirect will be handled by auth state change
     } catch (error) {
-      console.error('Failed to logout:', error);
+      console.error('Failed to logout:', error)
     }
-  };
+  }
 
   if (!user) {
     return (
@@ -71,7 +76,7 @@ export function UserMenu() {
         {showLoginModal && (
           <LoginModal
             onClose={() => {
-              setShowLoginModal(false);
+              setShowLoginModal(false)
             }}
           />
         )}
@@ -89,7 +94,9 @@ export function UserMenu() {
           <div className="w-8 h-8 bg-indigo-600 dark:bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
             {getInitials(user?.displayName || user?.email || null)}
           </div>
-          <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {/* Dropdown Menu */}
@@ -106,8 +113,8 @@ export function UserMenu() {
 
             <button
               onClick={() => {
-                setShowUserMenu(false);
-                router.push('/profile');
+                setShowUserMenu(false)
+                router.push('/profile')
               }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
             >
@@ -117,8 +124,8 @@ export function UserMenu() {
 
             <button
               onClick={() => {
-                setShowUserMenu(false);
-                setShowSettingsModal(true);
+                setShowUserMenu(false)
+                setShowSettingsModal(true)
               }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
             >
@@ -143,7 +150,7 @@ export function UserMenu() {
           userProfile={userProfile}
           onSave={handleSaveSettings}
           onClose={() => {
-            setShowSettingsModal(false);
+            setShowSettingsModal(false)
           }}
         />
       )}

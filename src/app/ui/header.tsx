@@ -1,6 +1,5 @@
-import { ThemeToggle } from '@/app/ui/theme-toggle';
-import { UserMenu } from '@/app/ui/user-menu';
-
+import { ThemeToggle } from '@/app/ui/theme-toggle'
+import { UserMenu } from '@/app/ui/user-menu'
 
 export function Header() {
   return (
@@ -8,8 +7,12 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">FamRank</h1>
-            <p className="text-sm italic text-gray-500 dark:text-gray-400">Your family&apos;s entertainment story</p>
+            <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+              FamRank
+            </h1>
+            <p className="text-sm italic text-gray-500 dark:text-gray-400">
+              Your family&apos;s entertainment story
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -19,5 +22,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
-};
+  )
+}

@@ -1,15 +1,15 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { X, Users, Save, Loader2, Trash } from 'lucide-react';
-import { useFamilyStore } from '@/app/store/family-store';
+import React, { useEffect, useState } from 'react'
+import { X, Users, Save, Loader2, Trash } from 'lucide-react'
+import { useFamilyStore } from '@/app/store/family-store'
 
 interface UpdateFamilyModalProps {
-  currentUserId: string;
-  isOpen: boolean;
-  onClose: () => void;
-  onDelete?: () => void;
-  onSuccess?: () => void;
+  currentUserId: string
+  isOpen: boolean
+  onClose: () => void
+  onDelete?: () => void
+  onSuccess?: () => void
 }
 
 export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
@@ -17,58 +17,70 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
   isOpen,
   onClose,
   onDelete,
-  onSuccess
+  onSuccess,
 }) => {
-  const { deleteFamily, updateFamily, clearError, currentFamily, loading, error } = useFamilyStore();
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [name, setName] = useState(currentFamily?.name || '');
-  const [description, setDescription] = useState(currentFamily?.description || '');
+  const {
+    deleteFamily,
+    updateFamily,
+    clearError,
+    currentFamily,
+    loading,
+    error,
+  } = useFamilyStore()
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [name, setName] = useState(currentFamily?.name || '')
+  const [description, setDescription] = useState(
+    currentFamily?.description || ''
+  )
 
   useEffect(() => {
     // Animate in/out
-    setIsAnimating(isOpen);
-  }, [isOpen]);
+    setIsAnimating(isOpen)
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!name.trim() || !currentFamily?.id) {
-      return;
+      return
     }
 
     try {
-      await updateFamily(currentFamily.id, { name: name.trim(), description: description.trim() || undefined });
-      handleClose();
-      onSuccess?.();
+      await updateFamily(currentFamily.id, {
+        name: name.trim(),
+        description: description.trim() || undefined,
+      })
+      handleClose()
+      onSuccess?.()
     } catch {
       // Error is handled by the store
     }
-  };
+  }
 
   const handleDelete = async () => {
-    if (!currentFamily?.id || !currentFamily.createdBy) return;
+    if (!currentFamily?.id || !currentFamily.createdBy) return
 
     // Show a confirmation modal before deleting the family
     const confirmed = window.confirm(
-      "Are you sure you want to delete this family? This action cannot be undone."
-    );
-    if (!confirmed) return;
+      'Are you sure you want to delete this family? This action cannot be undone.'
+    )
+    if (!confirmed) return
 
-    await deleteFamily(currentFamily.id, currentFamily.createdBy);
-    handleClose();
-    onDelete?.();
-  };
+    await deleteFamily(currentFamily.id, currentFamily.createdBy)
+    handleClose()
+    onDelete?.()
+  }
 
   const handleClose = () => {
     // Animate out before closing
-    setIsAnimating(false);
+    setIsAnimating(false)
     setTimeout(() => {
-      clearError();
-      onClose();
-    }, 200);
-  };
+      clearError()
+      onClose()
+    }, 200)
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -104,7 +116,10 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
           )}
 
           <div>
-            <label htmlFor="family-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="family-name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Family Name *
             </label>
             <input
@@ -119,7 +134,10 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
           </div>
 
           <div>
-            <label htmlFor="family-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="family-description"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Description (Optional)
             </label>
             <textarea
@@ -149,14 +167,16 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-          {currentUserId === currentFamily?.createdBy && <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 transition-colors rounded-lg flex items-center gap-2"
-          >
-            <Trash className="w-4 h-4" />
-            Delete
-          </button>}
+          {currentUserId === currentFamily?.createdBy && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 transition-colors rounded-lg flex items-center gap-2"
+            >
+              <Trash className="w-4 h-4" />
+              Delete
+            </button>
+          )}
           <button
             type="submit"
             onClick={handleSubmit}
@@ -178,5 +198,5 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

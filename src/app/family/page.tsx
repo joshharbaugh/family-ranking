@@ -1,47 +1,54 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Users, Plus, Loader2 } from 'lucide-react';
-import { useFamilyStore } from '@/app/store/family-store';
-import { useUserStore } from '@/app/store/user-store';
-import FamilyOverview from '@/app/family/ui/overview';
-import { CreateFamilyModal } from '@/app/ui/modals/create-family';
+import React, { useState, useEffect } from 'react'
+import { Users, Plus, Loader2 } from 'lucide-react'
+import { useFamilyStore } from '@/app/store/family-store'
+import { useUserStore } from '@/app/store/user-store'
+import FamilyOverview from '@/app/family/ui/overview'
+import { CreateFamilyModal } from '@/app/ui/modals/create-family'
 
 const FamilyPage: React.FC = () => {
-  const { families, currentFamily, loading: familiesLoading, error, fetchUserFamilies, setCurrentFamily } = useFamilyStore();
-  const { user } = useUserStore();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const {
+    families,
+    currentFamily,
+    loading: familiesLoading,
+    error,
+    fetchUserFamilies,
+    setCurrentFamily,
+  } = useFamilyStore()
+  const { user } = useUserStore()
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (user?.uid) {
-      setLoading(true);
-      fetchUserFamilies(user.uid);
+      setLoading(true)
+      fetchUserFamilies(user.uid)
     }
-  }, [user?.uid, fetchUserFamilies]);
+  }, [user?.uid, fetchUserFamilies])
 
   useEffect(() => {
     // If there is only one family, set it as the current family
     if (families && families.length === 1) {
-      setCurrentFamily(families[0]);
+      setCurrentFamily(families[0])
     }
 
     setTimeout(() => {
-      setLoading(false);
-    }, 600);
-  }, [families, setCurrentFamily]);
+      setLoading(false)
+    }, 600)
+  }, [families, setCurrentFamily])
 
   const handleCreateSuccess = () => {
     // The store will automatically update with the new family
-    setShowCreateModal(false);
-  };
+    setShowCreateModal(false)
+  }
 
   if (loading || familiesLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
       </div>
-    );
+    )
   }
 
   if ((!loading || !familiesLoading) && families.length === 0) {
@@ -56,7 +63,8 @@ const FamilyPage: React.FC = () => {
             No families yet!
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-            Create a family to start sharing rankings and experiences with your loved ones.
+            Create a family to start sharing rankings and experiences with your
+            loved ones.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -74,7 +82,7 @@ const FamilyPage: React.FC = () => {
           onSuccess={handleCreateSuccess}
         />
       </div>
-    );
+    )
   }
 
   return (
@@ -142,10 +150,7 @@ const FamilyPage: React.FC = () => {
 
       {/* Current Family Overview */}
       {currentFamily && user && (
-        <FamilyOverview
-          family={currentFamily}
-          currentUserId={user.uid}
-        />
+        <FamilyOverview family={currentFamily} currentUserId={user.uid} />
       )}
 
       {/* Create Family Modal */}
@@ -155,7 +160,7 @@ const FamilyPage: React.FC = () => {
         onSuccess={handleCreateSuccess}
       />
     </div>
-  );
-};
+  )
+}
 
-export default FamilyPage;
+export default FamilyPage

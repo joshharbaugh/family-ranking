@@ -1,62 +1,78 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
-  Camera, Edit3, Trophy, Star, TrendingUp,
-  Film, Tv, Book, BarChart3, PieChart, Calendar,
-  Award, Sparkles, Gamepad2, Loader2
-} from 'lucide-react';
-import { UserStats } from '@/lib/definitions/user';
-import { getInitials, getMediaIcon } from '@/lib/utils';
-import { useUserStore } from '@/app/store/user-store';
-import { db } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useRankings } from '@/app/hooks/useRankings';
-import Image from 'next/image';
+  Camera,
+  Edit3,
+  Trophy,
+  Star,
+  TrendingUp,
+  Film,
+  Tv,
+  Book,
+  BarChart3,
+  PieChart,
+  Calendar,
+  Award,
+  Sparkles,
+  Gamepad2,
+  Loader2,
+} from 'lucide-react'
+import { UserStats } from '@/lib/definitions/user'
+import { getInitials, getMediaIcon } from '@/lib/utils'
+import { useUserStore } from '@/app/store/user-store'
+import { db } from '@/lib/firebase'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { useRankings } from '@/app/hooks/useRankings'
+import Image from 'next/image'
 
 const ProfilePage = (): React.ReactElement => {
-  const { getUserStats, rankings } = useRankings();
-  const userProfile = useUserStore((state) => state.userProfile);
-  const updateUserProfile = useUserStore((state) => state.updateUserProfile);
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [tempBio, setTempBio] = useState(userProfile?.bio);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { getUserStats, rankings } = useRankings()
+  const userProfile = useUserStore((state) => state.userProfile)
+  const updateUserProfile = useUserStore((state) => state.updateUserProfile)
+  const [isEditingBio, setIsEditingBio] = useState(false)
+  const [tempBio, setTempBio] = useState(userProfile?.bio)
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
-      const userStats = await getUserStats();
-      setStats(userStats);
-      setLoading(false);
-    };
-    fetchStats();
-  }, [getUserStats, rankings]);
+      const userStats = await getUserStats()
+      setStats(userStats)
+      setLoading(false)
+    }
+    fetchStats()
+  }, [getUserStats, rankings])
 
   const handleSaveBio = async () => {
-    if (!userProfile) return;
-    const userRef = doc(db, 'users', userProfile?.uid);
+    if (!userProfile) return
+    const userRef = doc(db, 'users', userProfile?.uid)
 
-    await setDoc(userRef, {
-      bio: tempBio,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    updateUserProfile({ ...userProfile, bio: tempBio });
+    await setDoc(
+      userRef,
+      {
+        bio: tempBio,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+    updateUserProfile({ ...userProfile, bio: tempBio })
 
-    setIsEditingBio(false);
-  };
+    setIsEditingBio(false)
+  }
 
   const handleCancelBio = () => {
-    setTempBio(userProfile?.bio);
-    setIsEditingBio(false);
-  };
+    setTempBio(userProfile?.bio)
+    setIsEditingBio(false)
+  }
 
   // TODO: Add Skeleton Loader
-  if (loading ||!stats) {
+  if (loading || !stats) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
       </div>
-    );
+    )
   }
 
   return (
@@ -67,17 +83,26 @@ const ProfilePage = (): React.ReactElement => {
           {/* Avatar */}
           <div className="relative group">
             <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-              {getInitials(userProfile?.displayName || userProfile?.email || null)}
+              {getInitials(
+                userProfile?.displayName || userProfile?.email || null
+              )}
             </div>
-            <button title="Change Avatar" className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              title="Change Avatar"
+              className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+            >
               <Camera className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
 
           {/* User Info */}
           <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userProfile?.displayName}</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-3">{userProfile?.email}</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {userProfile?.displayName}
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-3">
+              {userProfile?.email}
+            </p>
 
             {/* Bio Section */}
             <div className="relative">
@@ -124,12 +149,20 @@ const ProfilePage = (): React.ReactElement => {
           {/* Quick Stats */}
           <div className="flex sm:flex-col gap-4 sm:gap-2 text-center">
             <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-              <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{stats.total}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Rankings</p>
+              <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                {stats.total}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Rankings
+              </p>
             </div>
             <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.avgRating}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Avg Rating</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {stats.avgRating}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Avg Rating
+              </p>
             </div>
           </div>
         </div>
@@ -204,14 +237,17 @@ const ProfilePage = (): React.ReactElement => {
               <div key={rating} className="flex items-center gap-2">
                 <div className="flex items-center gap-1 w-20">
                   {[...Array(rating)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-indigo-600 dark:bg-indigo-400 h-full transition-all duration-500"
                     style={{
-                      width: `${stats.total > 0 ? (stats.ratingDistribution[rating - 1] / stats.total) * 100 : 0}%`
+                      width: `${stats.total > 0 ? (stats.ratingDistribution[rating - 1] / stats.total) * 100 : 0}%`,
                     }}
                   />
                 </div>
@@ -276,7 +312,9 @@ const ProfilePage = (): React.ReactElement => {
                 height={120}
               />
               <div>
-                <h4 className="font-medium">{stats.highestRated?.media?.title || 'No title'}</h4>
+                <h4 className="font-medium">
+                  {stats.highestRated?.media?.title || 'No title'}
+                </h4>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -308,7 +346,9 @@ const ProfilePage = (): React.ReactElement => {
                 height={120}
               />
               <div>
-                <h4 className="font-medium">{stats.lowestRated?.media?.title || 'No title'}</h4>
+                <h4 className="font-medium">
+                  {stats.lowestRated?.media?.title || 'No title'}
+                </h4>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -336,9 +376,12 @@ const ProfilePage = (): React.ReactElement => {
           </h3>
           <div className="space-y-3">
             {stats.recentRankings.map((ranking) => {
-              const Icon = getMediaIcon(ranking.media?.type || 'movie');
+              const Icon = getMediaIcon(ranking.media?.type || 'movie')
               return (
-                <div key={ranking.id} className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                <div
+                  key={ranking.id}
+                  className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
+                >
                   <Image
                     src={ranking.media?.poster || ''}
                     alt={ranking.media?.title || ''}
@@ -365,13 +408,13 @@ const ProfilePage = (): React.ReactElement => {
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ProfilePage;
+export default ProfilePage

@@ -1,73 +1,87 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import { Search, Film, Tv, Book, Loader2, Gamepad2 } from 'lucide-react';
-import { Media, MediaType, Ranking } from '@/lib/definitions/index';
-import { MediaCard } from '@/app/ui/media-card';
-import { useSearch } from '@/app/hooks/useSearch';
-import { AddRankingModal } from '@/app/ui/modals/add-ranking';
-import { useRankings } from '@/app/hooks/useRankings';
+import React, { useState } from 'react'
+import { Search, Film, Tv, Book, Loader2, Gamepad2 } from 'lucide-react'
+import { Media, MediaType, Ranking } from '@/lib/definitions/index'
+import { MediaCard } from '@/app/ui/media-card'
+import { useSearch } from '@/app/hooks/useSearch'
+import { AddRankingModal } from '@/app/ui/modals/add-ranking'
+import { useRankings } from '@/app/hooks/useRankings'
 
 const SearchPage = (): React.ReactElement => {
-  const { addRanking, rankings } = useRankings();
-  const { searchMedia, searchResults, setSearchResults, isLoading, setIsLoading } = useSearch();
-  const [mediaType, setMediaType] = useState<MediaType>('movie');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
-  const [existingRanking, setExistingRanking] = useState<Ranking | null>(null);
+  const { addRanking, rankings } = useRankings()
+  const {
+    searchMedia,
+    searchResults,
+    setSearchResults,
+    isLoading,
+    setIsLoading,
+  } = useSearch()
+  const [mediaType, setMediaType] = useState<MediaType>('movie')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [hasSearched, setHasSearched] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null)
+  const [existingRanking, setExistingRanking] = useState<Ranking | null>(null)
 
   const handleAddToRankings = (media: Media) => {
-    setSelectedMedia(media);
-    setShowAddModal(true);
-  };
+    setSelectedMedia(media)
+    setShowAddModal(true)
+  }
 
   const handleSaveRanking = (ranking: Ranking) => {
-    addRanking(ranking.rank, ranking.notes, ranking.media);
-    setShowAddModal(false);
-    setSelectedMedia(null);
-    setExistingRanking(null);
-  };
+    addRanking(ranking.rank, ranking.notes, ranking.media)
+    setShowAddModal(false)
+    setSelectedMedia(null)
+    setExistingRanking(null)
+  }
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!searchQuery.trim()) {
-      setSearchResults([]);
-      setHasSearched(false);
-      return;
+      setSearchResults([])
+      setHasSearched(false)
+      return
     }
 
-    setIsLoading(true);
-    setHasSearched(true);
+    setIsLoading(true)
+    setHasSearched(true)
 
-    searchMedia(mediaType, searchQuery);
-  };
+    searchMedia(mediaType, searchQuery)
+  }
 
   const handleMediaTypeChange = (type: MediaType) => {
-    setMediaType(type);
-    setSearchResults([]);
-    setHasSearched(false);
-  };
+    setMediaType(type)
+    setSearchResults([])
+    setHasSearched(false)
+  }
 
   const getMediaIcon = (type: MediaType) => {
     switch (type) {
-      case 'movie': return <Film className="w-4 h-4" />;
-      case 'tv': return <Tv className="w-4 h-4" />;
-      case 'book': return <Book className="w-4 h-4" />;
-      case 'game': return <Gamepad2 className="w-4 h-4" />;
+      case 'movie':
+        return <Film className="w-4 h-4" />
+      case 'tv':
+        return <Tv className="w-4 h-4" />
+      case 'book':
+        return <Book className="w-4 h-4" />
+      case 'game':
+        return <Gamepad2 className="w-4 h-4" />
     }
-  };
+  }
 
   const getPlaceholder = () => {
     switch (mediaType) {
-      case 'movie': return 'Search for movies...';
-      case 'tv': return 'Search for TV shows...';
-      case 'book': return 'Search for books...';
-      case 'game': return 'Search for games...';
+      case 'movie':
+        return 'Search for movies...'
+      case 'tv':
+        return 'Search for TV shows...'
+      case 'book':
+        return 'Search for books...'
+      case 'game':
+        return 'Search for games...'
     }
-  };
+  }
 
   return (
     <>
@@ -76,9 +90,9 @@ const SearchPage = (): React.ReactElement => {
           media={selectedMedia || existingRanking?.media}
           onSave={handleSaveRanking}
           onClose={() => {
-            setShowAddModal(false);
-            setSelectedMedia(null);
-            setExistingRanking(null);
+            setShowAddModal(false)
+            setSelectedMedia(null)
+            setExistingRanking(null)
           }}
           existingRanking={existingRanking || undefined}
         />
@@ -154,16 +168,21 @@ const SearchPage = (): React.ReactElement => {
                 {hasSearched ? 'Search Results' : 'Suggestions'}
               </h2>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'}
+                {searchResults.length}{' '}
+                {searchResults.length === 1 ? 'result' : 'results'}
               </span>
             </div>
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}>
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}
+            >
               {searchResults.map((media) => (
                 <MediaCard
                   key={media.id}
                   media={media}
                   onAddToRankings={handleAddToRankings}
-                  isRanked={rankings.some((ranking) => ranking.media?.id === media.id)}
+                  isRanked={rankings.some(
+                    (ranking) => ranking.media?.id === media.id
+                  )}
                 />
               ))}
             </div>
@@ -177,13 +196,15 @@ const SearchPage = (): React.ReactElement => {
               Discover {mediaType === 'tv' ? 'TV Shows' : `${mediaType}s`}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              Search for your favorite {mediaType === 'tv' ? 'TV shows' : `${mediaType}s`} and add them to your personal rankings
+              Search for your favorite{' '}
+              {mediaType === 'tv' ? 'TV shows' : `${mediaType}s`} and add them
+              to your personal rankings
             </p>
           </div>
         ) : null}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default SearchPage;
+export default SearchPage

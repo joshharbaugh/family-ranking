@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { X, Save } from 'lucide-react';
-import React, { useState, useEffect, useRef } from 'react';
-import { UserProfile } from '@/lib/definitions/user';
+import { X, Save } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { UserProfile } from '@/lib/definitions/user'
 
 interface UserSettingsModalProps {
-  userProfile: UserProfile;
-  onSave: (updates: Partial<UserProfile>) => void;
-  onClose: () => void;
+  userProfile: UserProfile
+  onSave: (updates: Partial<UserProfile>) => void
+  onClose: () => void
 }
 
 export const UserSettingsModal = ({
@@ -15,29 +15,31 @@ export const UserSettingsModal = ({
   onSave,
   onClose,
 }: UserSettingsModalProps): React.ReactElement => {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [displayName, setDisplayName] = useState(userProfile.displayName);
-  const [email, setEmail] = useState(userProfile.email || '');
-  const [bio, setBio] = useState(userProfile.bio);
-  const [favoriteGenres, setFavoriteGenres] = useState(userProfile.favoriteGenres.join(', '));
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [displayName, setDisplayName] = useState(userProfile.displayName)
+  const [email, setEmail] = useState(userProfile.email || '')
+  const [bio, setBio] = useState(userProfile.bio)
+  const [favoriteGenres, setFavoriteGenres] = useState(
+    userProfile.favoriteGenres.join(', ')
+  )
+  const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Focus trap
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onClose()
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   useEffect(() => {
     // Animate in
-    setIsAnimating(true);
-  }, []);
+    setIsAnimating(true)
+  }, [])
 
   const handleSave = () => {
     const updates: Partial<UserProfile> = {
@@ -46,22 +48,22 @@ export const UserSettingsModal = ({
       bio: bio.trim(),
       favoriteGenres: favoriteGenres
         .split(',')
-        .map(g => g.trim())
-        .filter(g => g.length > 0)
-    };
+        .map((g) => g.trim())
+        .filter((g) => g.length > 0),
+    }
 
     // Animate out before saving
-    setIsAnimating(false);
+    setIsAnimating(false)
     setTimeout(() => {
-      onSave(updates);
-    }, 200);
-  };
+      onSave(updates)
+    }, 200)
+  }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   return (
     <div
@@ -102,7 +104,7 @@ export const UserSettingsModal = ({
               <input
                 type="text"
                 value={displayName}
-                onChange={e => setDisplayName(e.target.value)}
+                onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -114,7 +116,7 @@ export const UserSettingsModal = ({
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -125,7 +127,7 @@ export const UserSettingsModal = ({
               </label>
               <textarea
                 value={bio}
-                onChange={e => setBio(e.target.value)}
+                onChange={(e) => setBio(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 rows={3}
               />
@@ -138,7 +140,7 @@ export const UserSettingsModal = ({
               <input
                 type="text"
                 value={favoriteGenres}
-                onChange={e => setFavoriteGenres(e.target.value)}
+                onChange={(e) => setFavoriteGenres(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Comma separated"
               />

@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react'
 import {
   User,
   signInWithPopup,
@@ -9,46 +9,56 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail
-} from 'firebase/auth';
-import { auth, googleProvider, db } from '@/lib/firebase';
-import { doc, setDoc, getDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { useUserStore } from '@/app/store/user-store';
-import { UserProfile } from '@/lib/definitions/user';
-import { useThemeStore } from '@/app/store/theme-store';
-import { useRouter } from 'next/navigation';
+  sendPasswordResetEmail,
+} from 'firebase/auth'
+import { auth, googleProvider, db } from '@/lib/firebase'
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore'
+import { useUserStore } from '@/app/store/user-store'
+import { UserProfile } from '@/lib/definitions/user'
+import { useThemeStore } from '@/app/store/theme-store'
+import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-  signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
-  logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  clearError: () => void;
+  user: User | null
+  loading: boolean
+  error: string | null
+  signInWithGoogle: () => Promise<void>
+  signInWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    displayName: string
+  ) => Promise<void>
+  logout: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
+  clearError: () => void
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { theme, syncThemeWithFirebase } = useThemeStore();
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  const setUserProfile = useUserStore((state) => state.setUserProfile);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { theme, syncThemeWithFirebase } = useThemeStore()
+  const user = useUserStore((state) => state.user)
+  const setUser = useUserStore((state) => state.setUser)
+  const setUserProfile = useUserStore((state) => state.setUserProfile)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   // Create or update user profile in Firestore
   const createUserProfile = async (user: User) => {
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
+    const userRef = doc(db, 'users', user.uid)
+    const userSnap = await getDoc(userRef)
 
     if (!userSnap.exists()) {
       // Create new user profile
@@ -62,143 +72,151 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         createdAt: serverTimestamp() as Timestamp,
         updatedAt: serverTimestamp() as Timestamp,
         settings: {
-          theme
-        }
+          theme,
+        },
       }
-      await setDoc(userRef, profile);
-      setUserProfile(profile);
+      await setDoc(userRef, profile)
+      setUserProfile(profile)
     } else {
       // Update last login and sync theme
-      await setDoc(userRef, {
-        updatedAt: serverTimestamp() as Timestamp
-      }, { merge: true });
-      setUserProfile(userSnap.data() as UserProfile);
+      await setDoc(
+        userRef,
+        {
+          updatedAt: serverTimestamp() as Timestamp,
+        },
+        { merge: true }
+      )
+      setUserProfile(userSnap.data() as UserProfile)
 
       // Sync theme from Firebase
-      await syncThemeWithFirebase(user.uid);
+      await syncThemeWithFirebase(user.uid)
     }
-  };
+  }
 
   useEffect(() => {
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('dark')
     }
-  }, [theme]);
+  }, [theme])
 
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
-        setLoading(true);
+        setLoading(true)
 
         if (firebaseUser) {
           // Set user immediately to prevent redirect loop
-          setUser(firebaseUser);
+          setUser(firebaseUser)
 
           // Then create/update profile
-          await createUserProfile(firebaseUser);
+          await createUserProfile(firebaseUser)
         } else {
-          setUser(null);
-          setUserProfile(null);
-          router.push('/search'); // Redirect to search page if user is not logged in
+          setUser(null)
+          setUserProfile(null)
+          router.push('/search') // Redirect to search page if user is not logged in
         }
       } catch (err) {
-        console.error('Error handling auth state change:', err);
+        console.error('Error handling auth state change:', err)
         // Even if profile creation fails, we should still set the user
         if (firebaseUser) {
-          setUser(firebaseUser);
+          setUser(firebaseUser)
         }
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    });
+    })
 
-    return unsubscribe;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    return unsubscribe
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   // Sign in with Google
   const signInWithGoogle = async () => {
     try {
-      setError(null);
-      setLoading(true);
-      await signInWithPopup(auth, googleProvider);
+      setError(null)
+      setLoading(true)
+      await signInWithPopup(auth, googleProvider)
       // Profile creation and theme sync will be handled by onAuthStateChanged
     } catch (err: unknown) {
-      const error = err as Error;
-      console.error('Google sign-in error:', error);
-      setError(error.message || 'Failed to sign in with Google');
+      const error = err as Error
+      console.error('Google sign-in error:', error)
+      setError(error.message || 'Failed to sign in with Google')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      setError(null);
-      setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      setError(null)
+      setLoading(true)
+      await signInWithEmailAndPassword(auth, email, password)
       // Profile creation and theme sync will be handled by onAuthStateChanged
     } catch (err: unknown) {
-      const error = err as Error;
-      console.error('Email sign-in error:', error);
-      setError(error.message || 'Failed to sign in');
+      const error = err as Error
+      console.error('Email sign-in error:', error)
+      setError(error.message || 'Failed to sign in')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Sign up with email/password
-  const signUpWithEmail = async (email: string, password: string, displayName: string) => {
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    displayName: string
+  ) => {
     try {
-      setError(null);
-      setLoading(true);
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      setError(null)
+      setLoading(true)
+      const result = await createUserWithEmailAndPassword(auth, email, password)
 
       // Update display name
       if (result.user) {
-        await updateProfile(result.user, { displayName });
+        await updateProfile(result.user, { displayName })
       }
       // Profile creation and theme sync will be handled by onAuthStateChanged
     } catch (err: unknown) {
-      const error = err as Error;
-      console.error('Sign-up error:', error);
-      setError(error.message || 'Failed to create account');
+      const error = err as Error
+      console.error('Sign-up error:', error)
+      setError(error.message || 'Failed to create account')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Sign out
   const logout = async () => {
     try {
-      setLoading(true);
-      await signOut(auth);
+      setLoading(true)
+      await signOut(auth)
     } catch (err: unknown) {
-      const error = err as Error;
-      console.error('Logout error:', error);
-      setError(error.message || 'Failed to logout');
+      const error = err as Error
+      console.error('Logout error:', error)
+      setError(error.message || 'Failed to logout')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Reset password
   const resetPassword = async (email: string) => {
     try {
-      setError(null);
-      await sendPasswordResetEmail(auth, email);
+      setError(null)
+      await sendPasswordResetEmail(auth, email)
     } catch (err: unknown) {
-      const error = err as Error;
-      console.error('Password reset error:', error);
-      setError(error.message || 'Failed to send password reset email');
+      const error = err as Error
+      console.error('Password reset error:', error)
+      setError(error.message || 'Failed to send password reset email')
     }
-  };
+  }
 
   // Clear error
-  const clearError = () => setError(null);
+  const clearError = () => setError(null)
 
   const value: AuthContextType = {
     user,
@@ -209,12 +227,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUpWithEmail,
     logout,
     resetPassword,
-    clearError
-  };
+    clearError,
+  }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

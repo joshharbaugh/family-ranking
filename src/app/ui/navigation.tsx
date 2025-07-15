@@ -1,44 +1,64 @@
-"use client";
+'use client'
 
-import React from 'react';
-import { Search, Trophy, User, Users } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/app/hooks/useAuth';
+import React from 'react'
+import { Search, Trophy, User, Users } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useAuth } from '@/app/hooks/useAuth'
 
-type TabType = 'search' | 'rankings' | 'profile' | 'family';
+type TabType = 'search' | 'rankings' | 'profile' | 'family'
 
 interface NavItem {
-  id: TabType;
-  label: string;
-  icon: React.ReactNode;
-  path: string;
+  id: TabType
+  label: string
+  icon: React.ReactNode
+  path: string
 }
 
 export const Navigation = (): React.ReactElement => {
-  const { user } = useAuth();
-  const router = useRouter();
-  const path = usePathname();
+  const { user } = useAuth()
+  const router = useRouter()
+  const path = usePathname()
 
   const getActiveTab = () => {
-    if (path === '/search' || path === '/') return 'search';
-    if (path === '/rankings') return 'rankings';
-    if (path === '/family') return 'family';
-    if (path === '/profile') return 'profile';
-    return 'search';
-  };
+    if (path === '/search' || path === '/') return 'search'
+    if (path === '/rankings') return 'rankings'
+    if (path === '/family') return 'family'
+    if (path === '/profile') return 'profile'
+    return 'search'
+  }
 
-  const activeTab = getActiveTab();
+  const activeTab = getActiveTab()
 
   const navItems: NavItem[] = [
-    { id: 'search', label: 'Search', icon: <Search className="w-4 h-4" />, path: '/search' },
-    { id: 'rankings', label: 'Rankings', icon: <Trophy className="w-4 h-4" />, path: '/rankings' },
-    { id: 'family', label: 'Family', icon: <Users className="w-4 h-4" />, path: '/family' },
-    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" />, path: '/profile' },
-  ];
+    {
+      id: 'search',
+      label: 'Search',
+      icon: <Search className="w-4 h-4" />,
+      path: '/search',
+    },
+    {
+      id: 'rankings',
+      label: 'Rankings',
+      icon: <Trophy className="w-4 h-4" />,
+      path: '/rankings',
+    },
+    {
+      id: 'family',
+      label: 'Family',
+      icon: <Users className="w-4 h-4" />,
+      path: '/family',
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: <User className="w-4 h-4" />,
+      path: '/profile',
+    },
+  ]
 
   const handleTabChange = (path: string) => {
-    router.push(path);
-  };
+    router.push(path)
+  }
 
   return (
     <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
@@ -83,5 +103,5 @@ export const Navigation = (): React.ReactElement => {
         </div>
       </div>
     </nav>
-  );
-};
+  )
+}

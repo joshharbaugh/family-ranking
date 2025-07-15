@@ -1,58 +1,58 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { X, Users, Save, Loader2 } from 'lucide-react';
-import { useFamilyStore } from '@/app/store/family-store';
+import React, { useEffect, useState } from 'react'
+import { X, Users, Save, Loader2 } from 'lucide-react'
+import { useFamilyStore } from '@/app/store/family-store'
 
 interface CreateFamilyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
 }
 
 export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }) => {
-  const { createFamily, loading, error, clearError } = useFamilyStore();
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const { createFamily, loading, error, clearError } = useFamilyStore()
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
     // Animate in/out
-    setIsAnimating(isOpen);
-  }, [isOpen]);
+    setIsAnimating(isOpen)
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!name.trim()) {
-      return;
+      return
     }
 
     try {
-      await createFamily(name.trim(), description.trim() || undefined);
-      handleClose();
-      onSuccess?.();
+      await createFamily(name.trim(), description.trim() || undefined)
+      handleClose()
+      onSuccess?.()
     } catch {
       // Error is handled by the store
     }
-  };
+  }
 
   const handleClose = () => {
     // Animate out before closing
-    setIsAnimating(false);
+    setIsAnimating(false)
     setTimeout(() => {
-      setName('');
-      setDescription('');
-      clearError();
-      onClose();
-    }, 200);
-  };
+      setName('')
+      setDescription('')
+      clearError()
+      onClose()
+    }, 200)
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -88,7 +88,10 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
           )}
 
           <div>
-            <label htmlFor="family-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="family-name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Family Name *
             </label>
             <input
@@ -103,7 +106,10 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
           </div>
 
           <div>
-            <label htmlFor="family-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="family-description"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Description (Optional)
             </label>
             <textarea
@@ -162,5 +168,5 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

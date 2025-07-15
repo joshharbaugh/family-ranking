@@ -312,6 +312,27 @@ export class UserService {
     }
   }
 
+  // Update user profile fields
+  static async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
+    try {
+      const userRef = this.getUserProfileRef(userId);
+
+      const payload: Partial<UserProfile> = { ...updates };
+
+      if (updates.displayName) {
+        payload.displayNameLower = updates.displayName.toLowerCase();
+      }
+
+      await updateDoc(userRef, {
+        ...payload,
+        updatedAt: serverTimestamp() as Timestamp
+      });
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw new Error('Failed to update user profile');
+    }
+  }
+
   // FUTURE : Suggest users (autocomplete functionality)
   static async suggestUsers(prefix: string, limit: number = 5): Promise<string[]> {
     try {

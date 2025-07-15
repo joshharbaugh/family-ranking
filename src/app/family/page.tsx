@@ -1,11 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { Users, Plus } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
-import FamilyOverview from '@/app/family/ui/overview'
-import { CreateFamilyModal } from '@/app/ui/modals/create-family'
+import dynamic from 'next/dynamic'
+
+const FamilyOverview = dynamic(() => import('@/app/family/ui/overview'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any)
+
+const CreateFamilyModal = dynamic(
+  () => import('@/app/ui/modals/create-family').then((mod) => mod.CreateFamilyModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 import Loading from '@/app/ui/loading'
 
 const FamilyPage: React.FC = () => {
@@ -157,15 +166,19 @@ const FamilyPage: React.FC = () => {
 
       {/* Current Family Overview */}
       {currentFamily && user && (
-        <FamilyOverview family={currentFamily} currentUserId={user.uid} />
+        <Suspense fallback={<Loading />}>
+          <FamilyOverview family={currentFamily} currentUserId={user.uid} />
+        </Suspense>
       )}
 
       {/* Create Family Modal */}
-      <CreateFamilyModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={handleCreateSuccess}
-      />
+      <Suspense fallback={<Loading />}>
+        <CreateFamilyModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      </Suspense>
     </div>
   )
 }

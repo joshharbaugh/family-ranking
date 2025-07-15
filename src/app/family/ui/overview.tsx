@@ -1,11 +1,22 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { Users, Settings, Plus, User } from 'lucide-react'
 import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
 import { useFamilyStore } from '@/app/store/family-store'
-import { UpdateFamilyModal } from '@/app/ui/modals/update-family'
-import { AddFamilyMemberModal } from '@/app/ui/modals/add-family-member'
+import dynamic from 'next/dynamic'
+import Loading from '@/app/ui/loading'
+
+const UpdateFamilyModal = dynamic(
+  () => import('@/app/ui/modals/update-family').then((mod) => mod.UpdateFamilyModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
+const AddFamilyMemberModal = dynamic(
+  () => import('@/app/ui/modals/add-family-member').then((mod) => mod.AddFamilyMemberModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 import Image from 'next/image'
 
 interface FamilyOverviewProps {
@@ -89,21 +100,25 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
   return (
     <div className="space-y-6">
       {/* Update Family Modal */}
-      <UpdateFamilyModal
-        currentUserId={currentUserId}
-        isOpen={showUpdateFamilyModal}
-        onClose={() => setShowUpdateFamilyModal(false)}
-        onDelete={() => setShowUpdateFamilyModal(false)}
-        onSuccess={() => setShowUpdateFamilyModal(false)}
-      />
+      <Suspense fallback={<Loading />}>
+        <UpdateFamilyModal
+          currentUserId={currentUserId}
+          isOpen={showUpdateFamilyModal}
+          onClose={() => setShowUpdateFamilyModal(false)}
+          onDelete={() => setShowUpdateFamilyModal(false)}
+          onSuccess={() => setShowUpdateFamilyModal(false)}
+        />
+      </Suspense>
 
       {/* Add Family Member Modal */}
-      <AddFamilyMemberModal
-        currentUserId={currentUserId}
-        isOpen={showAddFamilyMemberModal}
-        onClose={() => setShowAddFamilyMemberModal(false)}
-        onSuccess={() => setShowAddFamilyMemberModal(false)}
-      />
+      <Suspense fallback={<Loading />}>
+        <AddFamilyMemberModal
+          currentUserId={currentUserId}
+          isOpen={showAddFamilyMemberModal}
+          onClose={() => setShowAddFamilyMemberModal(false)}
+          onSuccess={() => setShowAddFamilyMemberModal(false)}
+        />
+      </Suspense>
 
       {/* Family Header */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">

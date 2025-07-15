@@ -54,6 +54,7 @@ export function useUserSearch(options: UseUserSearchOptions = {}): UseUserSearch
     // Clear results if query is empty
     if (!query || query.trim().length === 0) {
       clearResults();
+      setLoading(false);
       return;
     }
 
@@ -62,6 +63,7 @@ export function useUserSearch(options: UseUserSearchOptions = {}): UseUserSearch
       // Check minimum length
       if (query.trim().length < minSearchLength) {
         setError(`Search query must be at least ${minSearchLength} characters`);
+        setLoading(false);
         return;
       }
 

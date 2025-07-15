@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useUserSearch } from '@/app/hooks/useUserSearch';
 import { Search, User, Mail, Sparkles, Clock, X } from 'lucide-react';
 import { UserProfile } from '@/lib/definitions/user';
+import Image from 'next/image';
 
 interface UserSearchProps {
   currentUserId: string;
@@ -147,10 +148,12 @@ export function UserSearch({
                 {/* User Avatar */}
                 <div className="flex-shrink-0">
                   {user.photoURL ? (
-                    <img
+                    <Image
                       src={user.photoURL}
                       alt={user.displayName}
                       className="w-10 h-10 rounded-full object-cover"
+                      width={40}
+                      height={40}
                     />
                   ) : (
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -227,7 +230,7 @@ export function UserSearch({
       {!loading && results.length === 0 && suggestions.length === 0 && query.trim().length >= 2 && !error && (
         <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
-            No users found for "{query}"
+            No users found for `{query}`
           </div>
         </div>
       )}

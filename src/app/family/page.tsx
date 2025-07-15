@@ -4,17 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { Users, Plus, Loader2 } from 'lucide-react';
 import { useFamilyStore } from '@/app/store/family-store';
 import { useUserStore } from '@/app/store/user-store';
-import FamilyOverview from '@/app/family/(overview)/page';
+import FamilyOverview from '@/app/family/ui/overview';
 import { CreateFamilyModal } from '@/app/ui/modals/create-family';
 
 const FamilyPage: React.FC = () => {
-  const { families, currentFamily, loading, error, fetchUserFamilies, setCurrentFamily } = useFamilyStore();
+  const { families, currentFamily, loading: familiesLoading, error, fetchUserFamilies, setCurrentFamily } = useFamilyStore();
   const { user } = useUserStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user?.uid) {
-      console.log('fetching families for user', user.uid);
+      setLoading(true);
       fetchUserFamilies(user.uid);
     }
   }, [user?.uid, fetchUserFamilies]);
@@ -24,6 +25,10 @@ const FamilyPage: React.FC = () => {
     if (families && families.length === 1) {
       setCurrentFamily(families[0]);
     }
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 600);
   }, [families, setCurrentFamily]);
 
   const handleCreateSuccess = () => {
@@ -31,7 +36,7 @@ const FamilyPage: React.FC = () => {
     setShowCreateModal(false);
   };
 
-  if (loading && families.length === 0) {
+  if (loading || familiesLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
@@ -39,7 +44,7 @@ const FamilyPage: React.FC = () => {
     );
   }
 
-  if (families.length === 0) {
+  if ((!loading || !familiesLoading) && families.length === 0) {
     return (
       <div className="space-y-6">
         {/* Empty State */}

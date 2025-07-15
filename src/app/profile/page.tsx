@@ -21,11 +21,13 @@ const ProfilePage = (): React.ReactElement => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [tempBio, setTempBio] = useState(userProfile?.bio);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       const userStats = await getUserStats();
       setStats(userStats);
+      setLoading(false);
     };
     fetchStats();
   }, [getUserStats, rankings]);
@@ -49,11 +51,13 @@ const ProfilePage = (): React.ReactElement => {
   };
 
   // TODO: Add Skeleton Loader
-  if (!stats) return (
-    <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-    </div>
-  );
+  if (loading ||!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

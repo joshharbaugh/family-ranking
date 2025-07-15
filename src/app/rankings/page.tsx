@@ -22,6 +22,7 @@ const RankingsPage = (): React.ReactNode => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [existingRanking, setExistingRanking] = useState<Ranking | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Sort and filter rankings
   const processedRankings = useMemo(() => {
@@ -67,6 +68,7 @@ const RankingsPage = (): React.ReactNode => {
       try {
         const userStats = await getUserStats();
         setStats(userStats);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching user stats:', error);
       }
@@ -93,11 +95,13 @@ const RankingsPage = (): React.ReactNode => {
   };
 
   // TODO: Add Skeleton Loader
-  if (!stats) return (
-    <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-    </div>
-  );
+  if (loading || !stats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+      </div>
+    );
+  }
 
   if (rankings.length === 0) {
     return (

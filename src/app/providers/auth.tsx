@@ -16,6 +16,7 @@ import { doc, setDoc, getDoc, serverTimestamp, Timestamp } from 'firebase/firest
 import { useUserStore } from '@/app/store/user-store';
 import { UserProfile } from '@/lib/definitions/user';
 import { useThemeStore } from '@/app/store/theme-store';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const setUserProfile = useUserStore((state) => state.setUserProfile);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Create or update user profile in Firestore
   const createUserProfile = async (user: User) => {
@@ -100,6 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           setUser(null);
           setUserProfile(null);
+          router.push('/search'); // Redirect to search page if user is not logged in
         }
       } catch (err) {
         console.error('Error handling auth state change:', err);

@@ -2,15 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/app/hooks/useAuth';
 import { useUserStore } from '@/app/store/user-store';
 import { getInitials } from '@/lib/utils';
+import LoginModal from '@/app/ui/modals/login';
 import { UserSettingsModal } from '@/app/ui/modals/user-settings';
 import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
-  const { user, logout } = useUserStore();
+  const { logout } = useAuth();
+  const { user, logout: logoutUserStore } = useUserStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -31,12 +35,13 @@ export function UserMenu() {
   };
 
   const handleLogin = () => {
-    router.push('/login');
+    setShowLoginModal(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      logout();
+      await logout();
+      logoutUserStore();
       // Redirect will be handled by auth state change
     } catch (error) {
       console.error('Failed to logout:', error);
@@ -45,15 +50,24 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="relative" ref={menuRef}>
-        <button
-          onClick={handleLogin}
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        >
-          <User className="w-4 h-4" />
-          Login
-        </button>
-      </div>
+      <>
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={handleLogin}
+            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <User className="w-4 h-4" />
+            Login
+          </button>
+        </div>
+        {showLoginModal && (
+          <LoginModal
+            onClose={() => {
+              setShowLoginModal(false);
+            }}
+          />
+        )}
+      </>
     )
   }
 

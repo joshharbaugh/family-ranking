@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { X, Users, Save, Loader2 } from 'lucide-react';
 import { useFamilyStore } from '@/app/store/family-store';

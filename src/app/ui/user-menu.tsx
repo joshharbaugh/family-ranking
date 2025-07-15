@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useUserStore } from '@/app/store/user-store';
+import { UserService } from '@/app/services/user-service';
+import { UserProfile } from '@/lib/definitions/user';
 import { getInitials } from '@/lib/utils';
 import LoginModal from '@/app/ui/modals/login';
 import { UserSettingsModal } from '@/app/ui/modals/user-settings';
@@ -11,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
   const { logout } = useAuth();
-  const { user, logout: logoutUserStore } = useUserStore();
+  const { user, userProfile, updateUserProfile, logout: logoutUserStore } = useUserStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -30,8 +32,14 @@ export function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSaveSettings = () => {
-    console.log('Save settings');
+  const handleSaveSettings = async (updates: Partial<UserProfile>) => {
+    if (!userProfile) return;
+    try {
+      await UserService.updateUserProfile(userProfile.uid, updates);
+      updateUserProfile({ ...userProfile, ...updates });
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+    }
   };
 
   const handleLogin = () => {
@@ -130,8 +138,9 @@ export function UserMenu() {
           </div>
         )}
       </div>
-      {showSettingsModal && (
+      {showSettingsModal && userProfile && (
         <UserSettingsModal
+          userProfile={userProfile}
           onSave={handleSaveSettings}
           onClose={() => {
             setShowSettingsModal(false);

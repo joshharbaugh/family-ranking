@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from 'react';
 import { UserService } from '@/app/services/user-service';
 import { UserProfile } from '@/lib/definitions/user';

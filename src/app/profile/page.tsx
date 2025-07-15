@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import {
   Camera, Edit3, Trophy, Star, TrendingUp,
@@ -271,6 +273,8 @@ const ProfilePage = ({ rankings }: ProfilePageProps): React.ReactElement => {
                 src={stats.highestRated.media?.poster || ''}
                 alt={stats.highestRated.media?.title || ''}
                 className="w-16 h-24 object-cover rounded shadow"
+                width={80}
+                height={120}
               />
               <div>
                 <h4 className="font-medium">{stats.highestRated?.media?.title || 'No title'}</h4>
@@ -301,6 +305,8 @@ const ProfilePage = ({ rankings }: ProfilePageProps): React.ReactElement => {
                 src={stats.lowestRated.media?.poster || ''}
                 alt={stats.lowestRated.media?.title || ''}
                 className="w-16 h-24 object-cover rounded shadow"
+                width={80}
+                height={120}
               />
               <div>
                 <h4 className="font-medium">{stats.lowestRated?.media?.title || 'No title'}</h4>
@@ -338,6 +344,8 @@ const ProfilePage = ({ rankings }: ProfilePageProps): React.ReactElement => {
                     src={ranking.media?.poster || ''}
                     alt={ranking.media?.title || ''}
                     className="w-12 h-18 object-cover rounded"
+                    width={80}
+                    height={120}
                   />
                   <div className="flex-1">
                     <p className="font-medium text-sm flex items-center gap-2">

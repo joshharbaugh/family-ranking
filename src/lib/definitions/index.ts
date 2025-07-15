@@ -9,7 +9,7 @@ export interface Media {
   releaseDate?: string;
   poster?: string;
   overview?: string;
-  rating?: number;
+  rating?: number | null;
 }
 
 export interface VolumeInfo {

@@ -47,6 +47,11 @@ export class RankingService {
         rankingDoc.createdAt = serverTimestamp() as Timestamp;
       }
 
+      // TODO : Use zod to validate the ranking schema
+      if (ranking.media?.rating === undefined && rankingDoc.media) {
+        rankingDoc.media.rating = null;
+      }
+
       await setDoc(doc(rankingsRef, ranking.id), rankingDoc);
     } catch (error) {
       console.error('Error saving ranking:', error);

@@ -6,7 +6,6 @@ import {
   Film, Tv, Book, BarChart3, PieChart, Calendar,
   Award, Sparkles, Gamepad2, Loader2
 } from 'lucide-react';
-import { Ranking } from '@/lib/definitions/index';
 import { UserStats } from '@/lib/definitions/user';
 import { getInitials, getMediaIcon } from '@/lib/utils';
 import { useUserStore } from '@/app/store/user-store';
@@ -15,12 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRankings } from '@/app/hooks/useRankings';
 import Image from 'next/image';
 
-interface ProfilePageProps {
-  rankings: Ranking[];
-}
-
-const ProfilePage = ({ rankings }: ProfilePageProps): React.ReactElement => {
-  const { getUserStats } = useRankings();
+const ProfilePage = (): React.ReactElement => {
+  const { getUserStats, rankings } = useRankings();
   const userProfile = useUserStore((state) => state.userProfile);
   const updateUserProfile = useUserStore((state) => state.updateUserProfile);
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -266,7 +261,7 @@ const ProfilePage = ({ rankings }: ProfilePageProps): React.ReactElement => {
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
               <Trophy className="w-4 h-4 text-yellow-600" />
-              Highest Rated
+              Highest Recent Rating
             </h3>
             <div className="flex items-center gap-3">
               <Image

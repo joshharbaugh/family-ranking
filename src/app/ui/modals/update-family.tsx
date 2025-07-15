@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import { X, Users, Save, Loader2, Trash } from 'lucide-react';
 import { useFamilyStore } from '@/app/store/family-store';
 
@@ -18,8 +20,14 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
   onSuccess
 }) => {
   const { deleteFamily, updateFamily, clearError, currentFamily, loading, error } = useFamilyStore();
+  const [isAnimating, setIsAnimating] = useState(false);
   const [name, setName] = useState(currentFamily?.name || '');
   const [description, setDescription] = useState(currentFamily?.description || '');
+
+  useEffect(() => {
+    // Animate in/out
+    setIsAnimating(isOpen);
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,15 +60,27 @@ export const UpdateFamilyModal: React.FC<UpdateFamilyModalProps> = ({
   };
 
   const handleClose = () => {
-    clearError();
-    onClose();
+    // Animate out before closing
+    setIsAnimating(false);
+    setTimeout(() => {
+      clearError();
+      onClose();
+    }, 200);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black backdrop-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className={`mb-0 fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 transition-opacity duration-200 ${
+        isAnimating ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      <div
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto transform transition-all duration-200 ${
+          isAnimating ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">

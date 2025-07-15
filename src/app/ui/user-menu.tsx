@@ -85,9 +85,7 @@ export function UserMenu() {
             <button
               onClick={() => {
                 setShowUserMenu(false);
-                // Navigate to profile tab
-                const event = new CustomEvent('navigate-to-profile');
-                window.dispatchEvent(event);
+                router.push('/profile');
               }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
             >

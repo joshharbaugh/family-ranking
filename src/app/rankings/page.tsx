@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2, Loader2 } from 'lucide-react';
+import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react';
 import { Media, Ranking } from '@/lib/definitions/index';
 import { UserStats } from '@/lib/definitions/user';
 import { getMediaIcon } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { useRankings } from '@/app/hooks/useRankings';
 import UISelect from '@/app/ui/select';
 import Image from 'next/image';
 import { AddRankingModal } from '@/app/ui/modals/add-ranking';
+import { RankingsSkeleton } from '@/app/ui/skeletons';
 
 type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title';
 type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game';
@@ -96,11 +97,7 @@ const RankingsPage = (): React.ReactNode => {
 
   // TODO: Add Skeleton Loader
   if (loading || !stats) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-      </div>
-    );
+    return <RankingsSkeleton />;
   }
 
   if (rankings.length === 0) {

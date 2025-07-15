@@ -9,18 +9,20 @@ interface UISelectProps {
     label: string,
     value: string
   }[],
-  onValueChange: (value: string) => void
+  onValueChange: (value: string) => void,
+  disabled?: boolean
 }
 
-function UISelect({ label, name, onValueChange, value, items }: UISelectProps) {
+function UISelect({ label, name, onValueChange, value, items, disabled }: UISelectProps) {
   return (
     <Select.Root
       name={name}
       onValueChange={onValueChange}
       value={value}
+      disabled={disabled}
     >
       <Select.Trigger
-        className="flex justify-between items-center min-w-[150px] px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-indigo-500"
+        className="disabled:opacity-50 flex justify-between items-center min-w-[150px] px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-indigo-500"
         aria-label={label}
       >
         <Select.Value placeholder="Select a value…" />

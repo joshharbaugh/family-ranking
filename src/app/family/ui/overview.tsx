@@ -75,7 +75,15 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
   )
 
   useEffect(() => {
-    if (family.id) fetchFamilyMembersWithDetails(family.id)
+    const fetchFamilyMembers = async () => {
+      try {
+        await fetchFamilyMembersWithDetails(family.id)
+      } catch (error) {
+        console.error('Error fetching family members:', error)
+      }
+    }
+
+    if (family.id) fetchFamilyMembers()
   }, [family.id, fetchFamilyMembersWithDetails])
 
   return (

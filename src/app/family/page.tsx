@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Users, Plus, Loader2 } from 'lucide-react'
+import { Users, Plus } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
 import FamilyOverview from '@/app/family/ui/overview'
 import { CreateFamilyModal } from '@/app/ui/modals/create-family'
+import Loading from '@/app/ui/loading'
 
 const FamilyPage: React.FC = () => {
   const {
@@ -21,10 +22,20 @@ const FamilyPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user?.uid) {
-      setLoading(true)
-      fetchUserFamilies(user.uid)
+    const fetchFamilies = async () => {
+      if (!user?.uid) return
+
+      try {
+        setLoading(true)
+        await fetchUserFamilies(user.uid)
+      } catch (error) {
+        console.error('Error fetching user families:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    if (user?.uid) fetchFamilies()
   }, [user?.uid, fetchUserFamilies])
 
   useEffect(() => {
@@ -44,11 +55,7 @@ const FamilyPage: React.FC = () => {
   }
 
   if (loading || familiesLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-      </div>
-    )
+    return <Loading />
   }
 
   if ((!loading || !familiesLoading) && families.length === 0) {

@@ -80,10 +80,10 @@ export function RankingsSkeleton() {
   )
 }
 
-export default function FamilyPageSkeleton() {
+export function FamilyOverviewSkeleton() {
   return (
-    <>
-      <div className={`${pulse} space-y-6 bg-gray-100`} />
-    </>
+    <div
+      className={`${pulse} space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm`}
+    />
   )
 }

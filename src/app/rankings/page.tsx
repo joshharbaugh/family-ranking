@@ -103,7 +103,6 @@ const RankingsPage = (): React.ReactNode => {
     setExistingRanking(null)
   }
 
-  // TODO: Add Skeleton Loader
   if (loading || !stats) {
     return <RankingsSkeleton />
   }

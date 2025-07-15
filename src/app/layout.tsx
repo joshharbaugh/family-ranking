@@ -1,8 +1,10 @@
 import '@/app/globals.css'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/app/providers/auth'
 import { Header } from '@/app/ui/header'
 import { Navigation } from '@/app/ui/navigation'
+import Loading from '@/app/ui/loading'
 // import { WebVitals } from "@/app/_components/web-vitals";
 
 export const metadata: Metadata = {
@@ -24,7 +26,9 @@ export default function RootLayout({
             <Header />
             <Navigation />
 
-            <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+            <Suspense fallback={<Loading />}>
+              <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+            </Suspense>
           </div>
         </AuthProvider>
       </body>

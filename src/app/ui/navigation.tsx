@@ -3,6 +3,7 @@
 import React from 'react';
 import { Search, Trophy, User, Users } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/app/hooks/useAuth';
 
 type TabType = 'search' | 'rankings' | 'profile' | 'family';
 
@@ -14,6 +15,7 @@ interface NavItem {
 }
 
 export const Navigation = (): React.ReactElement => {
+  const { user } = useAuth();
   const router = useRouter();
   const path = usePathname();
 
@@ -47,10 +49,11 @@ export const Navigation = (): React.ReactElement => {
             <button
               key={item.id}
               onClick={() => handleTabChange(item.path)}
-              className={`cursor-pointer py-3 px-1 border-b-2 font-medium text-sm capitalize transition-colors flex items-center gap-2 ${
+              disabled={!user && item.id !== 'search'}
+              className={`disabled:opacity-50 py-3 px-1 border-b-2 font-medium text-sm capitalize transition-colors flex items-center gap-2 ${
                 activeTab === item.id
                   ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 disabled:hover:text-gray-500 disabled:dark:hover:text-gray-400'
               }`}
               aria-current={activeTab === item.id ? 'page' : undefined}
             >

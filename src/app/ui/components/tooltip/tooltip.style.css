@@ -9,6 +9,16 @@
   animation-name: slideDown;
 }
 
+/* Animate in reverse when closing */
+.TooltipContent[data-state='closed'][data-side='top'] {
+  animation-name: slideDown;
+  animation-direction: reverse;
+}
+.TooltipContent[data-state='closed'][data-side='bottom'] {
+  animation-name: slideUp;
+  animation-direction: reverse;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

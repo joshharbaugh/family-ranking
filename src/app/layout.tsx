@@ -1,11 +1,18 @@
 import '@/app/globals.css'
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/app/providers/auth'
 import { Header } from '@/app/ui/header'
 import { Navigation } from '@/app/ui/navigation'
 import Loading from '@/app/ui/loading'
 // import { WebVitals } from "@/app/_components/web-vitals";
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  weight: ['400', '500', '700', '900'],
+})
 
 export const metadata: Metadata = {
   title: 'FamRank',
@@ -19,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         {/* <WebVitals /> */}
         <AuthProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">

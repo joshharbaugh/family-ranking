@@ -1,15 +1,29 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/app/hooks/useAuth'
 import { useUserStore } from '@/app/store/user-store'
 import { UserService } from '@/app/services/user-service'
 import { UserProfile } from '@/lib/definitions/user'
 import { getInitials } from '@/lib/utils'
-import LoginModal from '@/app/ui/modals/login'
-import { UserSettingsModal } from '@/app/ui/modals/user-settings'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
+const LoginModal = dynamic(
+  () => import('@/app/ui/modals/login').then((mod) => mod.LoginModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
+
+const UserSettingsModal = dynamic(
+  () =>
+    import('@/app/ui/modals/user-settings').then(
+      (mod) => mod.UserSettingsModal
+    ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 
 export function UserMenu() {
   const { logout } = useAuth()
@@ -73,12 +87,15 @@ export function UserMenu() {
             Login
           </button>
         </div>
+        {/* Login Modal (dynamic) */}
         {showLoginModal && (
-          <LoginModal
-            onClose={() => {
-              setShowLoginModal(false)
-            }}
-          />
+          <Suspense>
+            <LoginModal
+              onClose={() => {
+                setShowLoginModal(false)
+              }}
+            />
+          </Suspense>
         )}
       </>
     )
@@ -101,7 +118,7 @@ export function UserMenu() {
 
         {/* Dropdown Menu */}
         {showUserMenu && (
-          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {user?.displayName || 'User'}
@@ -145,14 +162,17 @@ export function UserMenu() {
           </div>
         )}
       </div>
+      {/* User Settings Modal (dynamic) */}
       {showSettingsModal && userProfile && (
-        <UserSettingsModal
-          userProfile={userProfile}
-          onSave={handleSaveSettings}
-          onClose={() => {
-            setShowSettingsModal(false)
-          }}
-        />
+        <Suspense>
+          <UserSettingsModal
+            userProfile={userProfile}
+            onSave={handleSaveSettings}
+            onClose={() => {
+              setShowSettingsModal(false)
+            }}
+          />
+        </Suspense>
       )}
     </>
   )

@@ -17,7 +17,7 @@ interface LoginModalProps {
   onClose: () => void
 }
 
-const LoginModal = ({ onClose }: LoginModalProps) => {
+export const LoginModal = ({ onClose }: LoginModalProps) => {
   const [mode, setMode] = useState<AuthMode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -391,5 +391,3 @@ const LoginModal = ({ onClose }: LoginModalProps) => {
     </div>
   )
 }
-
-export default LoginModal

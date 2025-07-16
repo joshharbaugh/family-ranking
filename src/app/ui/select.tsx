@@ -11,6 +11,7 @@ interface UISelectProps {
   }[]
   onValueChange: (value: string) => void
   disabled?: boolean
+  className?: string
 }
 
 function UISelect({
@@ -20,6 +21,7 @@ function UISelect({
   value,
   items,
   disabled,
+  className,
 }: UISelectProps) {
   return (
     <Select.Root
@@ -29,7 +31,7 @@ function UISelect({
       disabled={disabled}
     >
       <Select.Trigger
-        className="disabled:opacity-50 flex justify-between items-center min-w-[150px] px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-indigo-500"
+        className={`disabled:opacity-50 flex justify-between items-center min-w-[150px] px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-indigo-500 ${className}`}
         aria-label={label}
       >
         <Select.Value placeholder="Select a value…" />

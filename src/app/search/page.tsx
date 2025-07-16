@@ -7,6 +7,7 @@ import { MediaCard } from '@/app/ui/media-card'
 import { useSearch } from '@/app/hooks/useSearch'
 import { useRankings } from '@/app/hooks/useRankings'
 import dynamic from 'next/dynamic'
+import UISelect from '@/app/ui/select'
 
 const AddRankingModal = dynamic(
   () =>
@@ -109,37 +110,35 @@ const SearchPage = (): React.ReactElement => {
       )}
 
       <div className="space-y-6">
-        {/* Media Type Selector */}
-        <div className="flex gap-2 justify-center">
-          {(['movie', 'tv', 'book', 'game'] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => handleMediaTypeChange(type)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
-                mediaType === type
-                  ? 'bg-indigo-600 text-white shadow-lg scale-105'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {getMediaIcon(type)}
-              <span className="hidden md:block capitalize">
-                {type === 'tv' ? 'TV' : `${type}s`}
-              </span>
-            </button>
-          ))}
-        </div>
-
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
           <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={getPlaceholder()}
-              className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all"
-              disabled={isLoading}
-            />
+            <div className="flex items-center pl-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none">
+              {/* Media Type Selector */}
+              <UISelect
+                className="rounded-sm"
+                label="Media Type"
+                name="mediaType"
+                items={[
+                  { label: 'Movies', value: 'movie' },
+                  { label: 'TV', value: 'tv' },
+                  { label: 'Books', value: 'book' },
+                  { label: 'Games', value: 'game' },
+                ]}
+                value={mediaType}
+                onValueChange={(value) =>
+                  handleMediaTypeChange(value as MediaType)
+                }
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={getPlaceholder()}
+                className="w-full px-3 py-2 pr-12 focus:outline-none transition-all"
+                disabled={isLoading}
+              />
+            </div>
             <button
               type="submit"
               disabled={isLoading}

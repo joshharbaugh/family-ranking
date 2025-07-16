@@ -1,12 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import { Search, Film, Tv, Book, Loader2, Gamepad2 } from 'lucide-react'
 import { Media, MediaType, Ranking } from '@/lib/definitions/index'
 import { MediaCard } from '@/app/ui/media-card'
 import { useSearch } from '@/app/hooks/useSearch'
-import { AddRankingModal } from '@/app/ui/modals/add-ranking'
 import { useRankings } from '@/app/hooks/useRankings'
+import dynamic from 'next/dynamic'
+
+const AddRankingModal = dynamic(
+  () =>
+    import('@/app/ui/modals/add-ranking').then((mod) => mod.AddRankingModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 
 const SearchPage = (): React.ReactElement => {
   const { addRanking, rankings } = useRankings()
@@ -85,17 +92,20 @@ const SearchPage = (): React.ReactElement => {
 
   return (
     <>
+      {/* Add Ranking Modal (dynamic) */}
       {showAddModal && (selectedMedia || existingRanking) && (
-        <AddRankingModal
-          media={selectedMedia || existingRanking?.media}
-          onSave={handleSaveRanking}
-          onClose={() => {
-            setShowAddModal(false)
-            setSelectedMedia(null)
-            setExistingRanking(null)
-          }}
-          existingRanking={existingRanking || undefined}
-        />
+        <Suspense>
+          <AddRankingModal
+            media={selectedMedia || existingRanking?.media}
+            onSave={handleSaveRanking}
+            onClose={() => {
+              setShowAddModal(false)
+              setSelectedMedia(null)
+              setExistingRanking(null)
+            }}
+            existingRanking={existingRanking || undefined}
+          />
+        </Suspense>
       )}
 
       <div className="space-y-6">

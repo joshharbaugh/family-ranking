@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, Suspense } from 'react'
 import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react'
 import { Media, Ranking } from '@/lib/definitions/index'
 import { UserStats } from '@/lib/definitions/user'
@@ -8,11 +8,18 @@ import { getMediaIcon } from '@/lib/utils'
 import { useRankings } from '@/app/hooks/useRankings'
 import UISelect from '@/app/ui/select'
 import Image from 'next/image'
-import { AddRankingModal } from '@/app/ui/modals/add-ranking'
 import { RankingsSkeleton } from '@/app/ui/skeletons'
+import dynamic from 'next/dynamic'
 
 type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title'
 type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game'
+
+const AddRankingModal = dynamic(
+  () =>
+    import('@/app/ui/modals/add-ranking').then((mod) => mod.AddRankingModal),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 
 const RankingsPage = (): React.ReactNode => {
   const { addRanking, deleteRanking, getUserStats, rankings } = useRankings()
@@ -126,17 +133,20 @@ const RankingsPage = (): React.ReactNode => {
 
   return (
     <>
+      {/* Add Ranking Modal (dynamic) */}
       {showAddModal && (selectedMedia || existingRanking) && (
-        <AddRankingModal
-          media={selectedMedia || existingRanking?.media}
-          onSave={handleSave}
-          onClose={() => {
-            setShowAddModal(false)
-            setSelectedMedia(null)
-            setExistingRanking(null)
-          }}
-          existingRanking={existingRanking || undefined}
-        />
+        <Suspense>
+          <AddRankingModal
+            media={selectedMedia || existingRanking?.media}
+            onSave={handleSave}
+            onClose={() => {
+              setShowAddModal(false)
+              setSelectedMedia(null)
+              setExistingRanking(null)
+            }}
+            existingRanking={existingRanking || undefined}
+          />
+        </Suspense>
       )}
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header with Stats */}

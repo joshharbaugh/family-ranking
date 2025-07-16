@@ -16,7 +16,6 @@ import {
   Award,
   Sparkles,
   Gamepad2,
-  Loader2,
 } from 'lucide-react'
 import { UserStats } from '@/lib/definitions/user'
 import { getInitials, getMediaIcon } from '@/lib/utils'
@@ -25,6 +24,8 @@ import { db } from '@/lib/firebase'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useRankings } from '@/app/hooks/useRankings'
 import Image from 'next/image'
+import { ProfilePageSkeleton } from '@/app/ui/skeletons'
+import Link from 'next/link'
 
 const ProfilePage = (): React.ReactElement => {
   const { getUserStats, rankings } = useRankings()
@@ -66,11 +67,24 @@ const ProfilePage = (): React.ReactElement => {
     setIsEditingBio(false)
   }
 
-  // TODO: Add Skeleton Loader
   if (loading || !stats) {
+    return <ProfilePageSkeleton />
+  }
+
+  if (!loading && !stats) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <p className="text-sm text-red-600 dark:text-red-400">
+          <strong>Error:</strong> We are unable to load your profile statistics.
+          Please try again later or{' '}
+          <Link
+            href="/profile"
+            className="text-indigo-600 dark:text-indigo-400"
+          >
+            refresh the page
+          </Link>
+          .
+        </p>
       </div>
     )
   }

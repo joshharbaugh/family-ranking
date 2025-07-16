@@ -95,3 +95,35 @@ export function FamilyOverviewSkeleton() {
     </div>
   )
 }
+
+export function ProfilePageSkeleton() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[293px]`}
+      />
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
+        <div
+          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
+        />
+        <div
+          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
+        />
+        <div
+          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          className={`${pulse} bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4 h-[164px]`}
+        />
+        <div
+          className={`${pulse} bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg p-4 h-[164px]`}
+        />
+      </div>
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[300px]`}
+      />
+    </div>
+  )
+}

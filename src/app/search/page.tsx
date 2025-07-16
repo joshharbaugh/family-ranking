@@ -164,19 +164,19 @@ const SearchPage = (): React.ReactElement => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
               <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-3xl text-gray-900 dark:text-gray-100 mb-2">
               No results found
-            </p>
+            </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Try searching for something else or browse our suggestions below
             </p>
           </div>
         ) : searchResults.length > 0 ? (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <div className="flex items-baseline mb-4 gap-2">
+              <h3 className="text-2xl text-gray-900 dark:text-gray-100">
                 {hasSearched ? 'Search Results' : 'Suggestions'}
-              </h2>
+              </h3>
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 {searchResults.length}{' '}
                 {searchResults.length === 1 ? 'result' : 'results'}
@@ -202,7 +202,7 @@ const SearchPage = (): React.ReactElement => {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 dark:bg-indigo-900/20 rounded-full mb-4">
               {getMediaIcon(mediaType)}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-3xl text-gray-900 dark:text-gray-100 mb-2">
               Discover {mediaType === 'tv' ? 'TV Shows' : `${mediaType}s`}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">

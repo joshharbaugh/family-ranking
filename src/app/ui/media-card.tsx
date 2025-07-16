@@ -30,16 +30,21 @@ export const MediaCard = ({
         {media.rating && (
           <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 text-white px-2 py-1 rounded">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm">{media.rating}</span>
+            <span className="text-sm">{media.rating.toFixed(1)}</span>
           </div>
         )}
       </div>
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-lg line-clamp-1">{media.title}</h3>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h3
+            className="font-semibold text-lg line-clamp-1"
+            title={media.title}
+          >
+            {media.title}
+          </h3>
           <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
             <Icon className="w-4 h-4" />
-            <span className="text-xs">{media.releaseDate}</span>
+            <span className="text-xs text-nowrap">{media.releaseDate}</span>
           </div>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">

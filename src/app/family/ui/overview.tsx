@@ -8,12 +8,18 @@ import dynamic from 'next/dynamic'
 import Loading from '@/app/ui/loading'
 
 const UpdateFamilyModal = dynamic(
-  () => import('@/app/ui/modals/update-family').then((mod) => mod.UpdateFamilyModal),
+  () =>
+    import('@/app/ui/modals/update-family').then(
+      (mod) => mod.UpdateFamilyModal
+    ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
 const AddFamilyMemberModal = dynamic(
-  () => import('@/app/ui/modals/add-family-member').then((mod) => mod.AddFamilyMemberModal),
+  () =>
+    import('@/app/ui/modals/add-family-member').then(
+      (mod) => mod.AddFamilyMemberModal
+    ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
@@ -99,8 +105,8 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Update Family Modal */}
-      <Suspense fallback={<Loading />}>
+      {/* Update Family Modal (dynamic) */}
+      <Suspense>
         <UpdateFamilyModal
           currentUserId={currentUserId}
           isOpen={showUpdateFamilyModal}
@@ -110,8 +116,8 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
         />
       </Suspense>
 
-      {/* Add Family Member Modal */}
-      <Suspense fallback={<Loading />}>
+      {/* Add Family Member Modal (dynamic) */}
+      <Suspense>
         <AddFamilyMemberModal
           currentUserId={currentUserId}
           isOpen={showAddFamilyMemberModal}
@@ -173,68 +179,72 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
         </h3>
 
         <div className="grid gap-4">
-          {familyMembers.map((member: FamilyMember) => (
-            <div
-              key={member.userId}
-              className={`flex items-center gap-4 p-4 rounded-lg border ${
-                member.userId === currentUserId
-                  ? 'border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20'
-                  : 'border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              {/* Avatar */}
-              <div className="flex-shrink-0">
-                {member.photoURL ? (
-                  <Image
-                    src={member.photoURL || ''}
-                    alt={member.displayName || ''}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+          {(!familyMembers || familyMembers.length === 0) && (
+            <Loading className="min-h-[94px]" />
+          )}
+          {familyMembers &&
+            familyMembers.map((member: FamilyMember) => (
+              <div
+                key={member.userId}
+                className={`flex items-center gap-4 p-4 rounded-lg border ${
+                  member.userId === currentUserId
+                    ? 'border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20'
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                {/* Avatar */}
+                <div className="flex-shrink-0">
+                  {member.photoURL ? (
+                    <Image
+                      src={member.photoURL || ''}
+                      alt={member.displayName || ''}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Member Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {member.displayName}
+                    </h4>
+                    {member.userId === currentUserId && (
+                      <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">
+                        You
+                      </span>
+                    )}
+                    {member.userId === family.createdBy && (
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
+                        Creator
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Member Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {member.displayName}
-                  </h4>
-                  {member.userId === currentUserId && (
-                    <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">
-                      You
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-2xl">{getRoleIcon(member.role)}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {getRoleLabel(member.role)}
                     </span>
-                  )}
-                  {member.userId === family.createdBy && (
-                    <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
-                      Creator
-                    </span>
-                  )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-2xl">{getRoleIcon(member.role)}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {getRoleLabel(member.role)}
-                  </span>
+                {/* Status */}
+                <div className="flex-shrink-0">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      member.isActive
+                        ? 'bg-green-500'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                  />
                 </div>
               </div>
-
-              {/* Status */}
-              <div className="flex-shrink-0">
-                <div
-                  className={`w-3 h-3 rounded-full ${
-                    member.isActive
-                      ? 'bg-green-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 

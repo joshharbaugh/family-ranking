@@ -4,18 +4,24 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { Users, Plus } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
+import { FamilyOverviewSkeleton } from '@/app/ui/skeletons'
 import dynamic from 'next/dynamic'
+import Loading from '@/app/ui/loading'
 
-const FamilyOverview = dynamic(() => import('@/app/family/ui/overview'),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { suspense: true } as any)
-
-const CreateFamilyModal = dynamic(
-  () => import('@/app/ui/modals/create-family').then((mod) => mod.CreateFamilyModal),
+const FamilyOverview = dynamic(
+  () => import('@/app/family/ui/overview'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
-import Loading from '@/app/ui/loading'
+
+const CreateFamilyModal = dynamic(
+  () =>
+    import('@/app/ui/modals/create-family').then(
+      (mod) => mod.CreateFamilyModal
+    ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { suspense: true } as any
+)
 
 const FamilyPage: React.FC = () => {
   const {
@@ -67,7 +73,7 @@ const FamilyPage: React.FC = () => {
     return <Loading />
   }
 
-  if ((!loading || !familiesLoading) && families.length === 0) {
+  if (!loading && !familiesLoading && families.length === 0) {
     return (
       <div className="space-y-6">
         {/* Empty State */}
@@ -91,12 +97,14 @@ const FamilyPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Create Family Modal */}
-        <CreateFamilyModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={handleCreateSuccess}
-        />
+        {/* Create Family Modal (dynamic) */}
+        <Suspense>
+          <CreateFamilyModal
+            isOpen={showCreateModal}
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={handleCreateSuccess}
+          />
+        </Suspense>
       </div>
     )
   }
@@ -164,15 +172,15 @@ const FamilyPage: React.FC = () => {
         </div>
       )}
 
-      {/* Current Family Overview */}
+      {/* Current Family Overview (dynamic) */}
       {currentFamily && user && (
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<FamilyOverviewSkeleton />}>
           <FamilyOverview family={currentFamily} currentUserId={user.uid} />
         </Suspense>
       )}
 
-      {/* Create Family Modal */}
-      <Suspense fallback={<Loading />}>
+      {/* Create Family Modal (dynamic) */}
+      <Suspense>
         <CreateFamilyModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}

@@ -82,8 +82,16 @@ export function RankingsSkeleton() {
 
 export function FamilyOverviewSkeleton() {
   return (
-    <div
-      className={`${pulse} space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm`}
-    />
+    <div className="space-y-6">
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[148px]`}
+      />
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[186px]`}
+      />
+      <div
+        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[112px]`}
+      />
+    </div>
   )
 }

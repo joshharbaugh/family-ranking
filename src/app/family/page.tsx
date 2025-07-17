@@ -15,10 +15,7 @@ const FamilyOverview = dynamic(
 )
 
 const CreateFamilyModal = dynamic(
-  () =>
-    import('@/app/ui/modals/create-family').then(
-      (mod) => mod.CreateFamilyModal
-    ),
+  () => import('@/app/ui/modals/family').then((mod) => mod.FamilyModal),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
@@ -98,13 +95,17 @@ const FamilyPage: React.FC = () => {
         </div>
 
         {/* Create Family Modal (dynamic) */}
-        <Suspense>
-          <CreateFamilyModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            onSuccess={handleCreateSuccess}
-          />
-        </Suspense>
+        {user?.uid && (
+          <Suspense>
+            <CreateFamilyModal
+              currentUserId={user.uid}
+              isOpen={showCreateModal}
+              isNewFamily={true}
+              onClose={() => setShowCreateModal(false)}
+              onSuccess={handleCreateSuccess}
+            />
+          </Suspense>
+        )}
       </div>
     )
   }
@@ -180,13 +181,17 @@ const FamilyPage: React.FC = () => {
       )}
 
       {/* Create Family Modal (dynamic) */}
-      <Suspense>
-        <CreateFamilyModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={handleCreateSuccess}
-        />
-      </Suspense>
+      {user?.uid && (
+        <Suspense>
+          <CreateFamilyModal
+            currentUserId={user.uid}
+            isOpen={showCreateModal}
+            isNewFamily={true}
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={handleCreateSuccess}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

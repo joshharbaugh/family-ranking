@@ -14,9 +14,8 @@ import dynamic from 'next/dynamic'
 type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title'
 type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game'
 
-const AddRankingModal = dynamic(
-  () =>
-    import('@/app/ui/modals/add-ranking').then((mod) => mod.AddRankingModal),
+const RankingModal = dynamic(
+  () => import('@/app/ui/modals/ranking').then((mod) => mod.RankingModal),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
@@ -136,7 +135,7 @@ const RankingsPage = (): React.ReactNode => {
       {/* Add Ranking Modal (dynamic) */}
       {showAddModal && (selectedMedia || existingRanking) && (
         <Suspense>
-          <AddRankingModal
+          <RankingModal
             media={selectedMedia || existingRanking?.media}
             onSave={handleSave}
             onClose={() => {

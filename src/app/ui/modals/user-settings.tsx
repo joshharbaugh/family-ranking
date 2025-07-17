@@ -50,7 +50,7 @@ export const UserSettingsModal = ({
               </h3>
               <button
                 onClick={close}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -69,7 +69,7 @@ export const UserSettingsModal = ({
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
@@ -81,7 +81,7 @@ export const UserSettingsModal = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
@@ -92,7 +92,7 @@ export const UserSettingsModal = ({
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
                   rows={3}
                 />
               </div>
@@ -105,7 +105,7 @@ export const UserSettingsModal = ({
                   type="text"
                   value={favoriteGenres}
                   onChange={(e) => setFavoriteGenres(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
                   placeholder="Comma separated"
                 />
               </div>
@@ -113,16 +113,16 @@ export const UserSettingsModal = ({
           </div>
 
           {/* Footer */}
-          <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+          <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between gap-3">
             <button
               onClick={close}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={() => handleSave(close)}
-              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" /> Update
             </button>

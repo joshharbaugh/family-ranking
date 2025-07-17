@@ -1,24 +1,40 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Users, Save, Loader2 } from 'lucide-react'
+import { X, Users, Save, Loader2, Trash } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import Modal from '@/app/ui/components/modal'
 
-interface CreateFamilyModalProps {
+interface FamilyModalProps {
+  currentUserId: string
   isOpen: boolean
+  isNewFamily?: boolean
   onClose: () => void
+  onDelete?: () => void
   onSuccess?: () => void
 }
 
-export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
+export const FamilyModal: React.FC<FamilyModalProps> = ({
+  currentUserId,
   isOpen,
+  isNewFamily = false,
   onClose,
+  onDelete,
   onSuccess,
 }) => {
-  const { createFamily, loading, error, clearError } = useFamilyStore()
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
+  const {
+    createFamily,
+    deleteFamily,
+    updateFamily,
+    clearError,
+    currentFamily,
+    loading,
+    error,
+  } = useFamilyStore()
+  const [name, setName] = useState(isNewFamily ? '' : currentFamily?.name || '')
+  const [description, setDescription] = useState(
+    isNewFamily ? '' : currentFamily?.description || ''
+  )
 
   const handleSubmit = async (e: React.FormEvent, close: () => void) => {
     e.preventDefault()
@@ -28,17 +44,39 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
     }
 
     try {
-      await createFamily(name.trim(), description.trim() || undefined)
-      handleClose(close)
-      onSuccess?.()
+      if (isNewFamily || !currentFamily?.id) {
+        await createFamily(name.trim(), description.trim() || undefined)
+        handleClose(close)
+        onSuccess?.()
+        return
+      } else {
+        await updateFamily(currentFamily.id, {
+          name: name.trim(),
+          description: description.trim() || undefined,
+        })
+        handleClose(close)
+        onSuccess?.()
+      }
     } catch {
       // Error is handled by the store
     }
   }
 
+  const handleDelete = async (close: () => void) => {
+    if (!currentFamily?.id || !currentFamily.createdBy) return
+
+    // Show a confirmation modal before deleting the family
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this family? This action cannot be undone.'
+    )
+    if (!confirmed) return
+
+    await deleteFamily(currentFamily.id, currentFamily.createdBy)
+    handleClose(close)
+    onDelete?.()
+  }
+
   const handleClose = (close: () => void) => {
-    setName('')
-    setDescription('')
     clearError()
     close()
   }
@@ -56,7 +94,7 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              Create New Family
+              {isNewFamily ? 'Create Family' : 'Update Family'}
             </h2>
             <button
               onClick={() => handleClose(close)}
@@ -131,14 +169,26 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={() => handleClose(close)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              disabled={loading}
-            >
-              Cancel
-            </button>
+            {(isNewFamily || currentUserId !== currentFamily?.createdBy) && (
+              <button
+                type="button"
+                onClick={() => handleClose(close)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+            )}
+            {!isNewFamily && currentUserId === currentFamily?.createdBy && (
+              <button
+                type="button"
+                onClick={() => handleDelete(close)}
+                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 transition-colors rounded-lg flex items-center gap-2"
+              >
+                <Trash className="w-4 h-4" />
+                Delete
+              </button>
+            )}
             <button
               type="submit"
               onClick={(e) => handleSubmit(e, close)}
@@ -148,12 +198,12 @@ export const CreateFamilyModal: React.FC<CreateFamilyModalProps> = ({
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Creating...
+                  {isNewFamily ? 'Creating...' : 'Updating...'}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Create Family
+                  Save
                 </>
               )}
             </button>

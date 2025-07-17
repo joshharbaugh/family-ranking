@@ -8,10 +8,7 @@ import dynamic from 'next/dynamic'
 import Loading from '@/app/ui/loading'
 
 const UpdateFamilyModal = dynamic(
-  () =>
-    import('@/app/ui/modals/update-family').then(
-      (mod) => mod.UpdateFamilyModal
-    ),
+  () => import('@/app/ui/modals/family').then((mod) => mod.FamilyModal),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )

@@ -11,6 +11,8 @@ import {
 } from 'firebase/auth'
 import { AlertCircle, Mail, User, Eye, EyeOff, Lock, X } from 'lucide-react'
 import Modal from '@/app/ui/components/modal'
+import TextInput from '@/app/ui/components/text-input'
+import Button from '@/app/ui/components/button'
 
 type AuthMode = 'login' | 'signup' | 'reset'
 
@@ -165,7 +167,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <User className="h-5 w-5 text-gray-400" />
                       </div>
-                      <input
+                      <TextInput
                         id="displayName"
                         name="displayName"
                         type="text"
@@ -173,7 +175,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required={mode === 'signup'}
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        className="pl-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="pl-10"
                         placeholder="John Doe"
                       />
                     </div>
@@ -192,7 +194,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
+                    <TextInput
                       id="email"
                       name="email"
                       type="email"
@@ -200,7 +202,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="pl-10"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -219,7 +221,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Lock className="h-5 w-5 text-gray-400" />
                       </div>
-                      <input
+                      <TextInput
                         id="password"
                         name="password"
                         type={showPassword ? 'text' : 'password'}
@@ -229,7 +231,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="pl-10 pr-10"
                         placeholder={
                           mode === 'signup'
                             ? 'At least 6 characters'
@@ -264,7 +266,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Lock className="h-5 w-5 text-gray-400" />
                       </div>
-                      <input
+                      <TextInput
                         id="confirmPassword"
                         name="confirmPassword"
                         type={showPassword ? 'text' : 'password'}
@@ -272,7 +274,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="pl-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="pl-10"
                         placeholder="Confirm your password"
                       />
                     </div>
@@ -293,10 +295,10 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                 )}
 
                 {/* Submit button */}
-                <button
+                <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center"
                 >
                   {isSubmitting
                     ? 'Please wait...'
@@ -305,7 +307,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       : mode === 'signup'
                         ? 'Create account'
                         : 'Send reset email'}
-                </button>
+                </Button>
               </form>
 
               {/* Divider */}

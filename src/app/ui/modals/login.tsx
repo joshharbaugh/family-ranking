@@ -106,7 +106,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
         <>
           <button
             onClick={close}
-            className="absolute top-2 right-2 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -328,11 +328,11 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
 
                   {/* Google Sign In */}
                   <div className="mt-6">
-                    <button
-                      type="button"
+                    <Button
+                      variant="outline"
                       onClick={() => handleGoogleSignIn(close)}
                       disabled={isSubmitting}
-                      className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center gap-3 disabled:cursor-not-allowed"
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
@@ -353,7 +353,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         />
                       </svg>
                       Sign in with Google
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}

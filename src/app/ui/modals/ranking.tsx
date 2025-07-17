@@ -3,6 +3,7 @@ import { X, Star, Calendar, Save } from 'lucide-react'
 import { Media, Ranking } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
+import Button from '@/app/ui/components/button'
 import Modal from '@/app/ui/components/modal'
 import TextArea from '@/app/ui/components/text-area'
 
@@ -227,19 +228,16 @@ export const RankingModal = ({
 
           {/* Footer */}
           <div className="flex-none p-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between gap-3">
-            <button
-              onClick={close}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-            >
+            <Button variant="secondary" onClick={close}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleSave(close)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               {existingRanking ? 'Update' : 'Add'}
-            </button>
+            </Button>
           </div>
         </>
       )}

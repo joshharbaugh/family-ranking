@@ -9,6 +9,7 @@ import { UserProfile } from '@/lib/definitions/user'
 import { getInitials } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import Button from '@/app/ui/components/button'
 
 const LoginModal = dynamic(
   () => import('@/app/ui/modals/login').then((mod) => mod.LoginModal),
@@ -79,13 +80,10 @@ export function UserMenu() {
     return (
       <>
         <div className="relative" ref={menuRef}>
-          <button
-            onClick={handleLogin}
-            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
+          <Button onClick={handleLogin}>
             <User className="w-4 h-4" />
             Login
-          </button>
+          </Button>
         </div>
         {/* Login Modal (dynamic) */}
         {showLoginModal && (

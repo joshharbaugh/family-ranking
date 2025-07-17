@@ -8,6 +8,7 @@ import { FamilyRole } from '@/lib/definitions/family'
 import { UserSearch } from '@/app/ui/user-search'
 import { UserProfile } from '@/lib/definitions/user'
 import Modal from '@/app/ui/components/modal'
+import Button from '../components/button'
 
 interface AddFamilyMemberModalProps {
   currentUserId: string
@@ -142,19 +143,18 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={() => handleClose(close)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
               disabled={loading}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               onClick={(e) => handleSubmit(e, close)}
               disabled={loading || !userId.trim()}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               {loading ? (
                 <>
@@ -167,7 +167,7 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
                   Add Family Member
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </>
       )}

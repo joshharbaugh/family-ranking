@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import { X, Users, Save, Loader2, Trash } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import Modal from '@/app/ui/components/modal'
+import TextInput from '@/app/ui/components/text-input'
+import TextArea from '@/app/ui/components/text-area'
+import Button from '@/app/ui/components/button'
 
 interface FamilyModalProps {
   currentUserId: string
@@ -124,13 +127,12 @@ export const FamilyModal: React.FC<FamilyModalProps> = ({
               >
                 Family Name *
               </label>
-              <input
+              <TextInput
                 id="family-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter family name"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -142,13 +144,13 @@ export const FamilyModal: React.FC<FamilyModalProps> = ({
               >
                 Description (Optional)
               </label>
-              <textarea
+              <TextArea
                 id="family-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Tell us about your family..."
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="resize-none"
               />
             </div>
 
@@ -170,30 +172,29 @@ export const FamilyModal: React.FC<FamilyModalProps> = ({
           {/* Footer */}
           <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
             {(isNewFamily || currentUserId !== currentFamily?.createdBy) && (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => handleClose(close)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 disabled={loading}
               >
                 Cancel
-              </button>
+              </Button>
             )}
             {!isNewFamily && currentUserId === currentFamily?.createdBy && (
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={() => handleDelete(close)}
-                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 transition-colors rounded-lg flex items-center gap-2"
               >
                 <Trash className="w-4 h-4" />
                 Delete
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="submit"
               onClick={(e) => handleSubmit(e, close)}
               disabled={loading || !name.trim()}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors flex items-center gap-2"
             >
               {loading ? (
                 <>
@@ -206,7 +207,7 @@ export const FamilyModal: React.FC<FamilyModalProps> = ({
                   Save
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </>
       )}

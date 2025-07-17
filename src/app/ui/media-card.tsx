@@ -4,6 +4,7 @@ import { Media } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
 import UITooltip from '@/app/ui/components/tooltip'
+import Button from '@/app/ui/components/button'
 
 interface MediaCardProps {
   media: Media
@@ -50,10 +51,10 @@ export const MediaCard = ({
         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
           {media.overview}
         </p>
-        <button
+        <Button
           disabled={isRanked}
           onClick={() => onAddToRankings(media)}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:bg-green-500 disabled:opacity-60"
+          className="w-full justify-center disabled:bg-green-500 disabled:opacity-60"
         >
           {!isRanked ? (
             <Plus className="w-4 h-4" />
@@ -61,7 +62,7 @@ export const MediaCard = ({
             <Check className="w-4 h-4" />
           )}
           {!isRanked ? 'Add to Rankings' : 'Added to Rankings'}
-        </button>
+        </Button>
       </div>
     </div>
   )

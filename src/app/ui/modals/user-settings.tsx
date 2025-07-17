@@ -65,10 +65,15 @@ export const UserSettingsModal = ({
           <div className="p-6 space-y-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-display-name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Display Name
                 </label>
                 <TextInput
+                  id="settings-display-name"
+                  name="displayName"
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
@@ -76,10 +81,15 @@ export const UserSettingsModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Email
                 </label>
                 <TextInput
+                  id="settings-email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -87,10 +97,15 @@ export const UserSettingsModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-bio"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Bio
                 </label>
                 <TextArea
+                  id="settings-bio"
+                  name="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
@@ -98,10 +113,15 @@ export const UserSettingsModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-favorite-genres"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Favorite Genres
                 </label>
                 <TextInput
+                  id="settings-favorite-genres"
+                  name="favoriteGenres"
                   type="text"
                   value={favoriteGenres}
                   onChange={(e) => setFavoriteGenres(e.target.value)}
@@ -116,7 +136,10 @@ export const UserSettingsModal = ({
             <Button variant="secondary" onClick={close}>
               Cancel
             </Button>
-            <Button onClick={() => handleSave(close)} className="flex items-center justify-center gap-2">
+            <Button
+              onClick={() => handleSave(close)}
+              className="flex items-center justify-center gap-2"
+            >
               <Save className="w-4 h-4" /> Update
             </Button>
           </div>

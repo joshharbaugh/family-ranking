@@ -4,6 +4,7 @@ import { Media, Ranking } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
 import Modal from '@/app/ui/components/modal'
+import TextArea from '@/app/ui/components/text-area'
 
 interface RankingModalProps {
   media?: Media
@@ -195,7 +196,7 @@ export const RankingModal = ({
                 ))}
               </div>
 
-              <textarea
+              <TextArea
                 ref={notesRef}
                 id="notes"
                 value={notes}

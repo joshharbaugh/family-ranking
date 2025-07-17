@@ -1,7 +1,6 @@
 import UISelect from '@/app/ui/select'
+import { SkeletonBox } from '@/app/ui/components/skeleton'
 import { Book, Film, Gamepad2, Tv } from 'lucide-react'
-
-const pulse = 'animate-[pulse_2s_infinite] bg-gray-200 dark:bg-gray-700'
 
 export function RankingsSkeleton() {
   const sortItems = [
@@ -14,9 +13,7 @@ export function RankingsSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header with Stats Skeleton */}
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[216px]`}
-      ></div>
+      <SkeletonBox className="p-6 h-[216px]" />
       {/* Filters and Sort Skeleton */}
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Filter Buttons */}
@@ -70,10 +67,7 @@ export function RankingsSkeleton() {
       {/* Rankings List Skeleton */}
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div
-            className={`${pulse} flex items-center gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[152px]`}
-            key={i}
-          ></div>
+          <SkeletonBox className="flex items-center gap-4 p-4 h-[152px]" key={i} />
         ))}
       </div>
     </div>
@@ -83,15 +77,9 @@ export function RankingsSkeleton() {
 export function FamilyOverviewSkeleton() {
   return (
     <div className="space-y-6">
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[148px]`}
-      />
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[186px]`}
-      />
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[112px]`}
-      />
+      <SkeletonBox className="p-6 h-[148px]" />
+      <SkeletonBox className="p-6 h-[186px]" />
+      <SkeletonBox className="p-6 h-[112px]" />
     </div>
   )
 }
@@ -99,31 +87,17 @@ export function FamilyOverviewSkeleton() {
 export function ProfilePageSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[293px]`}
-      />
+      <SkeletonBox className="p-6 h-[293px]" />
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
-        <div
-          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
-        />
-        <div
-          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
-        />
-        <div
-          className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-[200px]`}
-        />
+        <SkeletonBox className="p-4 h-[200px]" />
+        <SkeletonBox className="p-4 h-[200px]" />
+        <SkeletonBox className="p-4 h-[200px]" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
-          className={`${pulse} bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4 h-[164px]`}
-        />
-        <div
-          className={`${pulse} bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg p-4 h-[164px]`}
-        />
+        <SkeletonBox className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4 h-[164px]" />
+        <SkeletonBox className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg p-4 h-[164px]" />
       </div>
-      <div
-        className={`${pulse} bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[300px]`}
-      />
+      <SkeletonBox className="p-6 h-[300px]" />
     </div>
   )
 }

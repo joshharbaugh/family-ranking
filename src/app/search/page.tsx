@@ -9,9 +9,8 @@ import { useRankings } from '@/app/hooks/useRankings'
 import dynamic from 'next/dynamic'
 import UISelect from '@/app/ui/select'
 
-const AddRankingModal = dynamic(
-  () =>
-    import('@/app/ui/modals/add-ranking').then((mod) => mod.AddRankingModal),
+const RankingModal = dynamic(
+  () => import('@/app/ui/modals/ranking').then((mod) => mod.RankingModal),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
@@ -96,7 +95,7 @@ const SearchPage = (): React.ReactElement => {
       {/* Add Ranking Modal (dynamic) */}
       {showAddModal && (selectedMedia || existingRanking) && (
         <Suspense>
-          <AddRankingModal
+          <RankingModal
             media={selectedMedia || existingRanking?.media}
             onSave={handleSaveRanking}
             onClose={() => {

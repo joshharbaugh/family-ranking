@@ -4,6 +4,9 @@ import { X, Save } from 'lucide-react'
 import React, { useState } from 'react'
 import { UserProfile } from '@/lib/definitions/user'
 import Modal from '@/app/ui/components/modal'
+import TextInput from '@/app/ui/components/text-input'
+import TextArea from '@/app/ui/components/text-area'
+import Button from '@/app/ui/components/button'
 
 interface UserSettingsModalProps {
   userProfile: UserProfile
@@ -62,50 +65,66 @@ export const UserSettingsModal = ({
           <div className="p-6 space-y-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-display-name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Display Name
                 </label>
-                <input
+                <TextInput
+                  id="settings-display-name"
+                  name="displayName"
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Email
                 </label>
-                <input
+                <TextInput
+                  id="settings-email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-bio"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Bio
                 </label>
-                <textarea
+                <TextArea
+                  id="settings-bio"
+                  name="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="settings-favorite-genres"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Favorite Genres
                 </label>
-                <input
+                <TextInput
+                  id="settings-favorite-genres"
+                  name="favoriteGenres"
                   type="text"
                   value={favoriteGenres}
                   onChange={(e) => setFavoriteGenres(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Comma separated"
                 />
               </div>
@@ -114,18 +133,15 @@ export const UserSettingsModal = ({
 
           {/* Footer */}
           <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between gap-3">
-            <button
-              onClick={close}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-            >
+            <Button variant="secondary" onClick={close}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleSave(close)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" /> Update
-            </button>
+            </Button>
           </div>
         </>
       )}

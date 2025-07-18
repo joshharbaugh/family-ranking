@@ -1,21 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import UISelect from './UISelect'
+import Select from '.'
 
-const meta: Meta<typeof UISelect> = {
-  component: UISelect,
-  title: 'ui/UISelect',
+const meta: Meta<typeof Select> = {
+  component: Select,
+  title: 'ui/Select',
   tags: ['autodocs'],
 }
 export default meta
 
-type Story = StoryObj<typeof UISelect>
+type Story = StoryObj<typeof Select>
 
 export const Default: Story = {
   render: function DefaultStory() {
     const [value, setValue] = useState('one')
     return (
-      <UISelect
+      <Select
         label="Select"
         name="select"
         value={value}

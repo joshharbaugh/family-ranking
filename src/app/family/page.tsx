@@ -6,7 +6,7 @@ import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
 import { FamilyOverviewSkeleton } from '@/app/ui/skeletons'
 import dynamic from 'next/dynamic'
-import Loading from '@/lib/ui/Loading'
+import Loading from '@/lib/ui/loading'
 
 const FamilyOverview = dynamic(
   () => import('@/app/family/ui/overview'),

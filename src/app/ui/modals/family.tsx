@@ -3,10 +3,10 @@
 import React, { useState } from 'react'
 import { X, Users, Save, Loader2, Trash } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
-import Modal from '@/lib/ui/Modal'
-import TextInput from '@/lib/ui/TextInput'
-import TextArea from '@/lib/ui/TextArea'
-import Button from '@/lib/ui/Button'
+import Modal from '@/lib/ui/modal'
+import TextInput from '@/lib/ui/text-input'
+import TextArea from '@/lib/ui/text-area'
+import Button from '@/lib/ui/button'
 
 interface FamilyModalProps {
   currentUserId: string

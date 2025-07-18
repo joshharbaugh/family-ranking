@@ -7,8 +7,8 @@ import { useFamilyStore } from '@/app/store/family-store'
 import { FamilyRole } from '@/lib/definitions/family'
 import { UserSearch } from '@/app/ui/user-search'
 import { UserProfile } from '@/lib/definitions/user'
-import Modal from '@/lib/ui/Modal'
-import Button from '@/lib/ui/Button'
+import Modal from '@/lib/ui/modal'
+import Button from '@/lib/ui/button'
 
 interface AddFamilyMemberModalProps {
   currentUserId: string

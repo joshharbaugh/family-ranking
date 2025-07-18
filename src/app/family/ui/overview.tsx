@@ -5,7 +5,7 @@ import { Users, Settings, Plus, User } from 'lucide-react'
 import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
 import { useFamilyStore } from '@/app/store/family-store'
 import dynamic from 'next/dynamic'
-import Loading from '@/lib/ui/Loading'
+import Loading from '@/lib/ui/loading'
 
 const UpdateFamilyModal = dynamic(
   () => import('@/app/ui/modals/family').then((mod) => mod.FamilyModal),

@@ -3,8 +3,8 @@ import { Star, Plus, Check } from 'lucide-react'
 import { Media } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
-import UITooltip from '@/app/ui/components/tooltip'
-import Button from '@/app/ui/components/button'
+import Tooltip from '@/lib/ui/tooltip'
+import Button from '@/lib/ui/button'
 
 interface MediaCardProps {
   media: Media
@@ -38,11 +38,11 @@ export const MediaCard = ({
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <UITooltip content={media.title}>
+          <Tooltip content={media.title}>
             <h3 className="font-semibold text-lg line-clamp-1">
               {media.title}
             </h3>
-          </UITooltip>
+          </Tooltip>
           <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
             <Icon className="w-4 h-4" />
             <span className="text-xs text-nowrap">{media.releaseDate}</span>

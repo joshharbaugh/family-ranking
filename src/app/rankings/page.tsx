@@ -6,7 +6,7 @@ import { Media, Ranking } from '@/lib/definitions/index'
 import { UserStats } from '@/lib/definitions/user'
 import { getMediaIcon } from '@/lib/utils'
 import { useRankings } from '@/app/hooks/useRankings'
-import UISelect from '@/app/ui/select'
+import Select from '@/lib/ui/select'
 import Image from 'next/image'
 import { RankingsSkeleton } from '@/app/ui/skeletons'
 import dynamic from 'next/dynamic'
@@ -269,7 +269,7 @@ const RankingsPage = (): React.ReactNode => {
           </div>
 
           {/* Sort Dropdown */}
-          <UISelect
+          <Select
             label="Sort by"
             name="sort-by"
             onValueChange={(value: string) => setSortBy(value as SortOption)}

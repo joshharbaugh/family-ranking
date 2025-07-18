@@ -3,9 +3,9 @@ import { X, Star, Calendar, Save } from 'lucide-react'
 import { Media, Ranking } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
-import Button from '@/app/ui/components/button'
-import Modal from '@/app/ui/components/modal'
-import TextArea from '@/app/ui/components/text-area'
+import Button from '@/lib/ui/button'
+import Modal from '@/lib/ui/modal'
+import TextArea from '@/lib/ui/text-area'
 
 interface RankingModalProps {
   media?: Media

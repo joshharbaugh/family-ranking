@@ -1,5 +1,5 @@
-import UISelect from '@/app/ui/select'
-import { SkeletonBox } from '@/app/ui/components/skeleton'
+import Select from '@/lib/ui/select'
+import { SkeletonBox } from '@/lib/ui/skeleton'
 import { Book, Film, Gamepad2, Tv } from 'lucide-react'
 
 export function RankingsSkeleton() {
@@ -55,7 +55,7 @@ export function RankingsSkeleton() {
         </div>
 
         {/* Sort Dropdown */}
-        <UISelect
+        <Select
           label="Sort by"
           name="sort-by"
           value="rank-desc"
@@ -67,7 +67,10 @@ export function RankingsSkeleton() {
       {/* Rankings List Skeleton */}
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <SkeletonBox className="flex items-center gap-4 p-4 h-[152px]" key={i} />
+          <SkeletonBox
+            className="flex items-center gap-4 p-4 h-[152px]"
+            key={i}
+          />
         ))}
       </div>
     </div>

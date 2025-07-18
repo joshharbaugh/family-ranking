@@ -10,9 +10,9 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import { AlertCircle, Mail, User, Eye, EyeOff, Lock, X } from 'lucide-react'
-import Modal from '@/app/ui/components/modal'
-import TextInput from '@/app/ui/components/text-input'
-import Button from '@/app/ui/components/button'
+import Modal from '@/lib/ui/modal'
+import TextInput from '@/lib/ui/text-input'
+import Button from '@/lib/ui/button'
 
 type AuthMode = 'login' | 'signup' | 'reset'
 

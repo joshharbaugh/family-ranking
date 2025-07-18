@@ -1,4 +1,5 @@
-export const skeletonClass = 'animate-[pulse_2s_infinite] bg-gray-200 dark:bg-gray-700'
+export const skeletonClass =
+  'animate-[pulse_2s_infinite] bg-gray-200 dark:bg-gray-700'
 
 export function SkeletonBox({ className = '' }: { className?: string }) {
   return (

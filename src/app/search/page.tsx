@@ -7,7 +7,7 @@ import { MediaCard } from '@/app/ui/media-card'
 import { useSearch } from '@/app/hooks/useSearch'
 import { useRankings } from '@/app/hooks/useRankings'
 import dynamic from 'next/dynamic'
-import UISelect from '@/app/ui/select'
+import Select from '@/lib/ui/select'
 
 const RankingModal = dynamic(
   () => import('@/app/ui/modals/ranking').then((mod) => mod.RankingModal),
@@ -114,7 +114,7 @@ const SearchPage = (): React.ReactElement => {
           <div className="relative">
             <div className="flex items-center pl-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none">
               {/* Media Type Selector */}
-              <UISelect
+              <Select
                 className="rounded-sm"
                 label="Media Type"
                 name="mediaType"

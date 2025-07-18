@@ -1,5 +1,5 @@
 import { Tooltip } from 'radix-ui'
-import './tooltip.style.css'
+import './tooltip.css'
 
 interface UITooltipProps {
   content: string

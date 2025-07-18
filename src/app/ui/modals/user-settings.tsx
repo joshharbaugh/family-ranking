@@ -3,10 +3,10 @@
 import { X, Save } from 'lucide-react'
 import React, { useState } from 'react'
 import { UserProfile } from '@/lib/definitions/user'
-import Modal from '@/app/ui/components/modal'
-import TextInput from '@/app/ui/components/text-input'
-import TextArea from '@/app/ui/components/text-area'
-import Button from '@/app/ui/components/button'
+import Modal from '@/lib/ui/Modal'
+import TextInput from '@/lib/ui/TextInput'
+import TextArea from '@/lib/ui/TextArea'
+import Button from '@/lib/ui/Button'
 
 interface UserSettingsModalProps {
   userProfile: UserProfile

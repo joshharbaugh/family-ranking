@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/app/providers/auth'
 import { Header } from '@/app/ui/header'
 import { Navigation } from '@/app/ui/navigation'
-import Loading from '@/app/ui/loading'
+import Loading from '@/lib/ui/Loading'
 // import { WebVitals } from "@/app/_components/web-vitals";
 
 const inter = Inter({

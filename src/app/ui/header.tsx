@@ -1,4 +1,4 @@
-import { ThemeToggle } from '@/app/ui/theme-toggle'
+import { ThemeToggle } from '@/lib/ui/ThemeToggle'
 import { UserMenu } from '@/app/ui/user-menu'
 
 export function Header() {

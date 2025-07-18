@@ -3,8 +3,8 @@ import { Star, Plus, Check } from 'lucide-react'
 import { Media } from '@/lib/definitions/index'
 import { getMediaIcon } from '@/lib/utils'
 import Image from 'next/image'
-import UITooltip from '@/app/ui/components/tooltip'
-import Button from '@/app/ui/components/button'
+import UITooltip from '@/lib/ui/Tooltip'
+import Button from '@/lib/ui/Button'
 
 interface MediaCardProps {
   media: Media

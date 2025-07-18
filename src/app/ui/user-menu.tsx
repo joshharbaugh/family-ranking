@@ -9,7 +9,7 @@ import { UserProfile } from '@/lib/definitions/user'
 import { getInitials } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import Button from '@/app/ui/components/button'
+import Button from '@/lib/ui/Button'
 
 const LoginModal = dynamic(
   () => import('@/app/ui/modals/login').then((mod) => mod.LoginModal),

@@ -7,7 +7,7 @@ import { MediaCard } from '@/app/ui/media-card'
 import { useSearch } from '@/app/hooks/useSearch'
 import { useRankings } from '@/app/hooks/useRankings'
 import dynamic from 'next/dynamic'
-import UISelect from '@/app/ui/select'
+import UISelect from '@/lib/ui/UISelect'
 
 const RankingModal = dynamic(
   () => import('@/app/ui/modals/ranking').then((mod) => mod.RankingModal),

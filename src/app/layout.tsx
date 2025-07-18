@@ -1,11 +1,8 @@
 import '@/app/globals.css'
-import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/app/providers/auth'
-import { Header } from '@/app/ui/header'
-import { Navigation } from '@/app/ui/navigation'
-import Loading from '@/lib/ui/loading'
+import { AppContent } from '@/app/ui/content'
 // import { WebVitals } from "@/app/_components/web-vitals";
 
 const inter = Inter({
@@ -29,14 +26,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         {/* <WebVitals /> */}
         <AuthProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
-            <Header />
-            <Navigation />
-
-            <Suspense fallback={<Loading />}>
-              <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
-            </Suspense>
-          </div>
+          <AppContent>{children}</AppContent>
         </AuthProvider>
       </body>
     </html>

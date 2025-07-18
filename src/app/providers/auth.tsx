@@ -192,7 +192,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Sign out
   const logout = async () => {
     try {
-      setLoading(true)
       await signOut(auth)
     } catch (err: unknown) {
       const error = err as Error

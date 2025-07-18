@@ -9,7 +9,13 @@ import Loading from '@/lib/ui/loading'
 export function AppContent({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth()
 
-  if (loading) return <Loading />
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        <Loading />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">

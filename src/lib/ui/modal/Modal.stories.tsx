@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import { useState } from 'react'
 import Modal from '.'
 import Button from '@/lib/ui/button'
 
 const meta: Meta<typeof Modal> = {
   component: Modal,
+  args: { onClose: fn() },
   title: 'ui/Modal',
   tags: ['autodocs'],
 }

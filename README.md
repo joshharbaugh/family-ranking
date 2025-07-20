@@ -56,6 +56,8 @@ A modern, full-stack family media ranking application built with Next.js, Fireba
 - `build` - Build for production
 - `start` - Start the production server
 - `lint` - Run ESLint
+- `test` - Run Vitest Unit & Integration tests
+- `test:e2e` - Run Playwright tests
 - `format` - Run Prettier on the codebase
 - `storybook` - Start Storybook for UI development
 - `build-storybook` - Build Storybook static site

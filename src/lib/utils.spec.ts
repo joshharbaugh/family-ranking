@@ -97,12 +97,14 @@ describe('getGameBoxart', () => {
 
   it('should return false when base_url is missing', () => {
     const invalidBoxart = { ...mockBoxart, base_url: undefined }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = getGameBoxart('123', invalidBoxart as any)
     expect(result).toBe(false)
   })
 
   it('should return false when data is missing', () => {
     const invalidBoxart = { ...mockBoxart, data: undefined }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = getGameBoxart('123', invalidBoxart as any)
     expect(result).toBe(false)
   })

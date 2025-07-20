@@ -1,6 +1,4 @@
-[![Unit & Integration Tests](https://github.com/joshharbaugh/family-ranking/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/joshharbaugh/family-ranking/actions/workflows/unit-tests.yml)
-
-[![E2E Tests](https://github.com/joshharbaugh/family-ranking/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/joshharbaugh/family-ranking/actions/workflows/e2e-tests.yml)
+[![Unit & Integration Tests](https://github.com/joshharbaugh/family-ranking/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/joshharbaugh/family-ranking/actions/workflows/unit-tests.yml) [![E2E Tests](https://github.com/joshharbaugh/family-ranking/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/joshharbaugh/family-ranking/actions/workflows/e2e-tests.yml)
 
 # Family Ranking App
 

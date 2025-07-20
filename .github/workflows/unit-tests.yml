@@ -25,6 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Note: We should not need to install Playwright browsers here,
+      # but it's a workaround to get the tests to run.
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Run unit tests
         run: npm test -- --run --coverage
 

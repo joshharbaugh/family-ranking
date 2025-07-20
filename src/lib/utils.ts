@@ -32,6 +32,9 @@ export const getGameBoxart = (gameId?: string, boxart?: GameBoxart) => {
   if (!gameId || !boxart || !boxart.base_url || !boxart.data) return false
   const { base_url, data } = boxart
 
+  // No boxart data found for this gameId
+  if (!data[gameId]) return false
+
   return `${base_url.medium}${data[gameId][0].filename}`
 }
 

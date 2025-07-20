@@ -88,7 +88,10 @@ export const RankingModal = ({
           {/* Header */}
           <div className="flex-none p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <h3
+                id="modal-title"
+                className="text-xl font-semibold text-gray-900 dark:text-gray-100"
+              >
                 {existingRanking ? 'Edit Ranking' : 'Add to Rankings'}
               </h3>
               <button

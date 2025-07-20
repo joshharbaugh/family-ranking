@@ -67,6 +67,7 @@ export const Navigation = (): React.ReactElement => {
         <div className="hidden sm:flex gap-8">
           {navItems.map((item) => (
             <button
+              role="tab"
               key={item.id}
               onClick={() => handleTabChange(item.path)}
               disabled={!user && item.id !== 'search'}
@@ -87,6 +88,7 @@ export const Navigation = (): React.ReactElement => {
         <div className="sm:hidden flex justify-around py-2">
           {navItems.map((item) => (
             <button
+              role="tab"
               key={item.id}
               onClick={() => handleTabChange(item.path)}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${

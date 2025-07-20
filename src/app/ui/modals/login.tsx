@@ -116,7 +116,10 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
           <div className="p-6 space-y-6">
             {/* Header */}
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              <h2
+                id="modal-title"
+                className="text-2xl font-semibold text-gray-900 dark:text-gray-100"
+              >
                 {mode === 'login' && 'Welcome back'}
                 {mode === 'signup' && 'Create your account'}
                 {mode === 'reset' && 'Reset your password'}

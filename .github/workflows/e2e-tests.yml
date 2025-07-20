@@ -59,7 +59,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
-          retention-days: 30
+          retention-days: 7
 
   test-mobile:
     timeout-minutes: 60
@@ -83,13 +83,6 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
-      - name: Troubleshooting (Using vars)
-        run: |
-          echo "Firebase Auth: $NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN Project ID: $NEXT_PUBLIC_FIREBASE_PROJECT_ID"
-        env:
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
 
       - name: Build the application
         run: npm run build
@@ -118,4 +111,4 @@ jobs:
           path: |
             playwright-report/
             test-results/
-          retention-days: 30
+          retention-days: 7

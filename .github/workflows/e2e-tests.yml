@@ -84,6 +84,13 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Troubleshooting (Using env)
+        run: |
+          echo "Firebase Auth: $NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN Project ID: $NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+        env:
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+
       - name: Build the application
         run: npm run build
         env:

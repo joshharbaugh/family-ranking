@@ -69,6 +69,7 @@ export class UserService {
             searchTerm,
             limitCount
           )
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return results.map((result: any) => result.content as UserProfile)
         } catch (upstashError) {
           console.warn(

@@ -73,27 +73,12 @@ export function useUserSearch(
         setError(null)
 
         try {
-          try {
-            // Hydrate the search index
-            await UserService.updateAllUsersForSearch()
-          } catch (error) {
-            console.error('Error hydrating search index:', error)
-          }
-
-          console.log('User Search', query)
-
           const searchTerm = query.trim()
 
           // Get search results
           const searchResults = await UserService.getUsersByName(
             searchTerm,
             maxResults
-          )
-
-          // Get suggestions for autocomplete
-          const searchSuggestions = await UserService.suggestUsers(
-            searchTerm,
-            5
           )
 
           // Process and score results
@@ -105,6 +90,7 @@ export function useUserSearch(
             let score = 0
 
             // Determine relevance and score
+            // FUTURE : Use Upstash to determine relevance and score
             if (displayNameLower === searchTermLower) {
               relevance = 'exact'
               score = 100
@@ -115,7 +101,7 @@ export function useUserSearch(
               relevance = 'partial'
               score = 60
             } else {
-              // Fuzzy match (handled by Elasticsearch)
+              // Fuzzy match (handled by Upstash)
               relevance = 'fuzzy'
               score = 40
             }
@@ -141,14 +127,12 @@ export function useUserSearch(
           processedResults.sort((a, b) => (b._score || 0) - (a._score || 0))
 
           setResults(processedResults)
-          setSuggestions(searchSuggestions)
         } catch (err) {
           console.error('Search error:', err)
           setError(
             err instanceof Error ? err.message : 'Failed to search users'
           )
           setResults([])
-          setSuggestions([])
         } finally {
           setLoading(false)
         }

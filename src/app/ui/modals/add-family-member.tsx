@@ -167,7 +167,7 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Add Family Member
+                  Save
                 </>
               )}
             </Button>

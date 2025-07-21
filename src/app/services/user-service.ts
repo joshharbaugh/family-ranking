@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { UserProfile } from '@/lib/definitions/user'
-// import { ElasticService } from "@/lib/services/elasticService";
+import { UpstashService } from '@/app/services/upstash-service'
 
 export class UserService {
   private static getUsersRef() {
@@ -25,15 +25,15 @@ export class UserService {
     return doc(db, 'users', userId)
   }
 
-  // TODO : Check if Elasticsearch is available
-  // private static async isElasticsearchAvailable(): Promise<boolean> {
-  //   try {
-  //     return await ElasticService.healthCheck();
-  //   } catch {
-  //     console.warn('Elasticsearch not available, falling back to Firestore search');
-  //     return false;
-  //   }
-  // }
+  // Check if Upstash is available
+  private static async isUpstashAvailable(): Promise<boolean> {
+    try {
+      return await UpstashService.healthCheck()
+    } catch {
+      console.warn('Upstash not available, falling back to Firestore search')
+      return false
+    }
+  }
 
   // Get user profile by ID
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
@@ -51,7 +51,7 @@ export class UserService {
     }
   }
 
-  // Get users by name with fuzzy search (Elasticsearch preferred, Firestore fallback)
+  // Get users by name with fuzzy search (Upstash preferred, Firestore fallback)
   static async getUsersByName(
     searchTerm: string,
     limitCount: number = 10
@@ -61,16 +61,22 @@ export class UserService {
         return []
       }
 
-      // TODO : Try Elasticsearch first
-      // const isElasticAvailable = await this.isElasticsearchAvailable();
-      // if (isElasticAvailable) {
-      //   try {
-      //     const results = await ElasticService.searchUsersByName(searchTerm, limitCount);
-      //     return results;
-      //   } catch (elasticError) {
-      //     console.warn('Elasticsearch search failed, falling back to Firestore:', elasticError);
-      //   }
-      // }
+      // Try Upstash first
+      const isUpstashAvailable = await this.isUpstashAvailable()
+      if (isUpstashAvailable) {
+        try {
+          const results = await UpstashService.searchUsers(
+            searchTerm,
+            limitCount
+          )
+          return results.map((result: any) => result.content as UserProfile)
+        } catch (upstashError) {
+          console.warn(
+            'Upstash search failed, falling back to Firestore:',
+            upstashError
+          )
+        }
+      }
 
       // Fallback to Firestore search
       return await this.getUsersByNameFirestore(searchTerm, limitCount)
@@ -210,16 +216,19 @@ export class UserService {
         return []
       }
 
-      // TODO : Try Elasticsearch first
-      // const isElasticAvailable = await this.isElasticsearchAvailable();
-      // if (isElasticAvailable) {
-      //   try {
-      //     const results = await ElasticService.searchUsers({ name, email, limit: limitCount });
-      //     return results;
-      //   } catch (elasticError) {
-      //     console.warn('Elasticsearch search failed, falling back to Firestore:', elasticError);
-      //   }
-      // }
+      // Try Upstash first
+      const isUpstashAvailable = await this.isUpstashAvailable()
+      if (isUpstashAvailable) {
+        try {
+          // const results = await UpstashService.searchUsers({ name, email, limit: limitCount });
+          return []
+        } catch (upstashError) {
+          console.warn(
+            'Upstash search failed, falling back to Firestore:',
+            upstashError
+          )
+        }
+      }
 
       // Fallback to Firestore
       if (name && email) {
@@ -265,15 +274,15 @@ export class UserService {
           updatedAt: serverTimestamp() as Timestamp,
         })
 
-        // Also update in Elasticsearch if available
-        // try {
-        //   const isElasticAvailable = await this.isElasticsearchAvailable();
-        //   if (isElasticAvailable) {
-        //     await ElasticService.updateUser(userId, { displayNameLower: user.displayName.toLowerCase() });
-        //   }
-        // } catch (elasticError) {
-        //   console.warn('Failed to update user in Elasticsearch:', elasticError);
-        // }
+        // Also update in Upstash if available
+        try {
+          const isUpstashAvailable = await this.isUpstashAvailable()
+          if (isUpstashAvailable) {
+            await UpstashService.updateUser(userId, user)
+          }
+        } catch (upstashError) {
+          console.warn('Failed to update user in Upstash:', upstashError)
+        }
       }
     } catch (error) {
       console.error('Error updating user for search:', error)
@@ -324,15 +333,15 @@ export class UserService {
         await batch.commit()
       }
 
-      // Update Elasticsearch if available
-      // try {
-      //   const isElasticAvailable = await this.isElasticsearchAvailable();
-      //   if (isElasticAvailable && usersToIndex.length > 0) {
-      //     await ElasticService.bulkIndexUsers(usersToIndex);
-      //   }
-      // } catch (elasticError) {
-      //   console.warn('Failed to bulk index users in Elasticsearch:', elasticError);
-      // }
+      // Update Upstash if available
+      try {
+        const isUpstashAvailable = await this.isUpstashAvailable()
+        if (isUpstashAvailable && usersToIndex.length > 0) {
+          await UpstashService.updateUsers(usersToIndex)
+        }
+      } catch (upstashError) {
+        console.warn('Failed to bulk index users in Upstash:', upstashError)
+      }
     } catch (error) {
       console.error('Error updating all users for search:', error)
       throw new Error('Failed to update all users for search')
@@ -369,15 +378,15 @@ export class UserService {
     limit: number = 5
   ): Promise<string[]> {
     try {
-      // TODO : Try Elasticsearch first
-      // const isElasticAvailable = await this.isElasticsearchAvailable();
-      // if (isElasticAvailable) {
-      //   try {
-      //     return await ElasticService.suggestUsers(prefix, limit);
-      //   } catch (elasticError) {
-      //     console.warn('Elasticsearch suggestions failed:', elasticError);
-      //   }
-      // }
+      // Try Upstash first
+      const isUpstashAvailable = await this.isUpstashAvailable()
+      if (isUpstashAvailable) {
+        try {
+          return await UpstashService.suggestUsers(prefix, limit)
+        } catch (upstashError) {
+          console.warn('Upstash suggestions failed:', upstashError)
+        }
+      }
 
       // Fallback to simple prefix matching
       const users = await this.getUsersByNameFirestore(prefix, limit)

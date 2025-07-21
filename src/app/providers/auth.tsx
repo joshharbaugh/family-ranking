@@ -23,6 +23,7 @@ import { useUserStore } from '@/app/store/user-store'
 import { UserProfile } from '@/lib/definitions/user'
 import { useThemeStore } from '@/app/store/theme-store'
 import { useRouter } from 'next/navigation'
+import { UpstashService } from '@/app/services/upstash-service'
 
 interface AuthContextType {
   user: User | null
@@ -55,8 +56,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Create or update user profile in Firestore
-  const createUserProfile = async (user: User) => {
+  // Upsert user profile in Firestore and Upstash
+  const upsertUserProfile = async (user: User) => {
     const userRef = doc(db, 'users', user.uid)
     const userSnap = await getDoc(userRef)
 
@@ -75,7 +76,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           theme,
         },
       }
+      // Update Firestore
       await setDoc(userRef, profile)
+
+      // Update Upstash
+      await UpstashService.updateUser(user.uid, profile)
+
+      // Update user store
       setUserProfile(profile)
     } else {
       // Update last login and sync theme
@@ -86,6 +93,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
         { merge: true }
       )
+
+      // Update Upstash
+      await UpstashService.updateUser(user.uid, userSnap.data() as UserProfile)
+
+      // Update user store
       setUserProfile(userSnap.data() as UserProfile)
 
       // Sync theme from Firebase
@@ -104,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (user?.uid === firebaseUser?.uid) return
       try {
         setLoading(true)
 
@@ -112,7 +125,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(firebaseUser)
 
           // Then create/update profile
-          await createUserProfile(firebaseUser)
+          await upsertUserProfile(firebaseUser)
         } else {
           setUser(null)
           setUserProfile(null)

@@ -30,7 +30,7 @@ export const UserSettingsModal = ({
     const updates: Partial<UserProfile> = {
       displayName: displayName.trim(),
       email: email.trim(),
-      bio: bio.trim(),
+      bio: bio?.trim() || '',
       favoriteGenres: favoriteGenres
         .split(',')
         .map((g) => g.trim())

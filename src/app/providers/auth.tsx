@@ -10,7 +10,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendSignInLinkToEmail,
+  // sendSignInLinkToEmail,
   sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider, db } from '@/lib/firebase'

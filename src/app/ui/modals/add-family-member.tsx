@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { X, Users, Save, Loader2 } from 'lucide-react'
 import { UserService } from '@/app/services/user-service'
-import { useInvitation } from '@/app/hooks/useInvitation'
+// import { useInvitation } from '@/app/hooks/useInvitation'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
 import { Invitation } from '@/lib/definitions'
@@ -30,13 +30,18 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   onSuccess,
 }) => {
   // const { sendEmailLink } = useAuth()
-  const { addFamilyMember, clearError, currentFamily, loading, error } =
-    useFamilyStore()
   const {
-    loading: inviteLoading,
-    error: inviteError,
-    sendInvitation,
-  } = useInvitation()
+    // addFamilyMember,
+    clearError,
+    currentFamily,
+    loading,
+    error,
+  } = useFamilyStore()
+  // const {
+  //   loading: inviteLoading,
+  //   error: inviteError,
+  //   sendInvitation,
+  // } = useInvitation()
   const { user } = useUserStore()
   const [email, setEmail] = useState<string>('')
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([])

@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Users, Save, Loader2 } from 'lucide-react'
+import { X, Users, Save, Loader2, Check } from 'lucide-react'
 import { UserService } from '@/app/services/user-service'
-// import { useInvitation } from '@/app/hooks/useInvitation'
+import { useInvitation } from '@/app/hooks/useInvitation'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
 import { Invitation } from '@/lib/definitions'
@@ -37,11 +37,11 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
     loading,
     error,
   } = useFamilyStore()
-  // const {
-  //   loading: inviteLoading,
-  //   error: inviteError,
-  //   sendInvitation,
-  // } = useInvitation()
+  const {
+    loading: inviteLoading,
+    error: inviteError,
+    sendInvitation,
+  } = useInvitation()
   const { user } = useUserStore()
   const [email, setEmail] = useState<string>('')
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([])
@@ -87,15 +87,6 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
     if (!invite.email.trim() || !currentFamily || !user || !user.displayName)
       return
 
-    console.log(
-      invite.email.trim(),
-      currentFamily?.id,
-      currentUserId,
-      currentFamily?.name,
-      user?.displayName,
-      invite.role
-    )
-
     try {
       setPendingInvites(
         pendingInvites.map((pendingInvite) =>
@@ -106,20 +97,21 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
       )
     } catch (error) {
       console.error('Error changing invite status', error)
+      return
     }
 
-    // const result = await sendInvitation(
-    //   invite.email.trim(),
-    //   currentFamily.id,
-    //   currentUserId,
-    //   currentFamily.name,
-    //   user.displayName,
-    //   invite.role
-    // )
+    const result = await sendInvitation(
+      invite.email.trim(),
+      currentFamily.id,
+      currentUserId,
+      currentFamily.name,
+      user.displayName,
+      invite.role
+    )
 
-    // if (result.success) {
-    //   console.log(result)
-    // }
+    if (result && result.success && result.token) {
+      console.log('Invitation Token: ', result.token)
+    }
   }
 
   const handleRemoveEmail = (email: string) => {
@@ -172,7 +164,7 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <Modal onClose={onClose} containerClassName="max-w-md w-full">
+    <Modal onClose={onClose} containerClassName="max-w-lg w-full">
       {(close) => (
         <>
           {/* Header */}
@@ -198,6 +190,14 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
               <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <p className="text-sm text-red-600 dark:text-red-400">
                   {error}
+                </p>
+              </div>
+            )}
+
+            {inviteError && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {inviteError}
                 </p>
               </div>
             )}
@@ -257,18 +257,27 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
                     onValueChange={(value) =>
                       handleRoleChange(invite.email, value as FamilyRole)
                     }
-                    disabled={invite.status === 'sent'}
+                    disabled={invite.status === 'sent' && !inviteError}
                   />
                   {!invite.id && (
                     <Button
                       type="button"
                       variant={
-                        invite.status === 'sent' ? 'secondary' : 'outline'
+                        invite.status === 'sent' && !inviteError
+                          ? 'secondary'
+                          : 'outline'
                       }
                       onClick={() => handleInvite(invite)}
-                      disabled={invite.status === 'sent'}
+                      disabled={invite.status === 'sent' && !inviteError}
+                      className="px-3 py-1"
                     >
-                      {invite.status === 'sent' ? 'Sent' : 'Invite'}
+                      {inviteLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : invite.status === 'sent' && !inviteError ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        'Invite'
+                      )}
                     </Button>
                   )}
                   {invite.id && (

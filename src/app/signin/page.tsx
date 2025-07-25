@@ -8,10 +8,20 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth'
-import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  User,
+} from 'lucide-react'
 import TextInput from '@/lib/ui/text-input'
 import Button from '@/lib/ui/button'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useInvitation } from '@/app/hooks/useInvitation'
+import type { Invitation } from '@/lib/definitions'
 
 type AuthMode = 'login' | 'signup' | 'reset'
 
@@ -20,6 +30,7 @@ export default function SignIn() {
   const searchParams = useSearchParams()
   const [mode, setMode] = useState<AuthMode>('signup')
   const [email, setEmail] = useState(searchParams.get('email') ?? '')
+  const [token] = useState(searchParams.get('token') ?? '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -27,12 +38,39 @@ export default function SignIn() {
   const [localError, setLocalError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [invitation, setInvitation] = useState<Invitation | null>(null)
+  const {
+    loading: inviteLoading,
+    error: inviteError,
+    validateInvitation,
+    completeInvitation,
+  } = useInvitation()
 
   useEffect(() => {
     // Clear errors when switching modes
     setLocalError('')
     setSuccessMessage('')
   }, [mode])
+
+  useEffect(() => {
+    const fetchInvitation = async () => {
+      try {
+        await validateInvitation(token).then((result) => {
+          if (result.success && result.invitation) {
+            setInvitation(result.invitation)
+          } else {
+            // TODO: Redirect to home or show error
+            // router.push('/?error=invalid-invitation')
+            console.log('Validation error')
+          }
+        })
+      } catch (error) {
+        console.error('Error fetching user families:', error)
+      }
+    }
+
+    if (token && typeof token === 'string') fetchInvitation()
+  }, [token, validateInvitation])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +91,12 @@ export default function SignIn() {
           setIsSubmitting(false)
           return
         }
+        if (token) {
+          await completeInvitation(token, password, displayName)
+          router.push('/search')
+          return
+        }
+
         await createUserWithEmailAndPassword(auth, email, password)
         router.push('/search')
       } else if (mode === 'login') {
@@ -98,6 +142,20 @@ export default function SignIn() {
     <div className="relative max-w-md w-full">
       {/* Content */}
       <div className="p-6 space-y-6">
+        {inviteError && (
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {inviteError}
+            </p>
+          </div>
+        )}
+
+        {inviteLoading && (
+          <div className="flex justify-center align-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center">
           <h2
@@ -105,24 +163,33 @@ export default function SignIn() {
             className="text-2xl font-semibold text-gray-900 dark:text-gray-100"
           >
             {mode === 'login' && 'Welcome back'}
-            {mode === 'signup' && 'Create your account'}
+            {mode === 'signup' && !invitation && 'Create your account'}
+            {mode === 'signup' && invitation && 'Complete your registration'}
             {mode === 'reset' && 'Reset your password'}
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {mode === 'login' && "Don't have an account? "}
-            {mode === 'signup' && 'Already have an account? '}
-            {mode === 'reset' && 'Remember your password? '}
-            <button
-              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
-            >
-              {mode === 'login' ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
+          {invitation && (
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              You&apos;ve been invited to join{' '}
+              {invitation.familyName || 'the family'}.
+            </p>
+          )}
+          {!invitation && (
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {mode === 'login' && "Don't have an account? "}
+              {mode === 'signup' && 'Already have an account? '}
+              {mode === 'reset' && 'Remember your password? '}
+              <button
+                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+                className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+              >
+                {mode === 'login' ? 'Sign up' : 'Sign in'}
+              </button>
+            </p>
+          )}
         </div>
 
         {/* Form */}
-        <div className="py-6 px-4 sm:rounded-lg sm:px-10 bg-white dark:bg-gray-800 text-gray-500 shadow-md">
+        <div className="py-6 px-4 sm:rounded-lg sm:px-10 bg-white dark:bg-gray-800 text-gray-500 shadow-lg dark:shadow-lg">
           {/* Error/Success Messages */}
           {localError && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-sm flex items-start gap-2">
@@ -184,7 +251,7 @@ export default function SignIn() {
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
+                  value={email || invitation?.email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 py-2"
                   placeholder="you@example.com"
@@ -215,6 +282,7 @@ export default function SignIn() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 py-2"
                     placeholder="At least 6 characters"
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -254,6 +322,7 @@ export default function SignIn() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pl-10 py-2"
                     placeholder="Confirm your password"
+                    minLength={6}
                   />
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { Invitation } from '@/lib/definitions'
 import {
   Family,
   FamilyMember,
@@ -6,11 +7,13 @@ import {
   FamilyRole,
 } from '@/lib/definitions/family'
 import { FamilyService } from '@/app/services/family-service'
+import { InvitationService } from '@/app/services/invitation-service'
 import { useUserStore } from '@/app/store/user-store'
 
 interface FamilyStore {
   families: Family[]
   currentFamily: Family | null
+  invitations: Invitation[]
   familyMemberRoles: FamilyMemberRole[]
   familyMembers: FamilyMember[]
   loading: boolean
@@ -33,6 +36,7 @@ interface FamilyStore {
   ) => Promise<void>
   fetchFamilyMemberRoles: (familyId: string) => Promise<void>
   fetchFamilyMembersWithDetails: (familyId: string) => Promise<void>
+  fetchFamilyInvitations: (familyId: string) => Promise<void>
   updateFamilySettings: (
     familyId: string,
     settings: Partial<Family['settings']>
@@ -48,6 +52,7 @@ interface FamilyStore {
 export const useFamilyStore = create<FamilyStore>((set, get) => ({
   families: [],
   currentFamily: null,
+  invitations: [],
   familyMemberRoles: [],
   familyMembers: [],
   loading: false,
@@ -213,6 +218,17 @@ export const useFamilyStore = create<FamilyStore>((set, get) => ({
       set({ familyMembers: members as unknown as FamilyMember[] })
     } catch (error) {
       console.error('Error fetching family members with details:', error)
+    }
+  },
+
+  fetchFamilyInvitations: async (familyId: string) => {
+    try {
+      const response = await new InvitationService().getInvitationsByFamilyId(
+        familyId
+      )
+      set({ invitations: response as unknown as Invitation[] })
+    } catch (error) {
+      console.error('Error fetching family member invitations:', error)
     }
   },
 

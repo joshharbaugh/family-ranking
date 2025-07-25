@@ -98,6 +98,15 @@ export class InvitationService {
     } as Invitation
   }
 
+  async getInvitationsByFamilyId(
+    familyId: string
+  ): Promise<Invitation[] | null> {
+    const q = query(this.getInvitationsRef(), where('familyId', '==', familyId))
+
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map((doc) => doc.data() as Invitation)
+  }
+
   async acceptInvitation(token: string): Promise<Invitation> {
     const invitation = await this.getInvitationByToken(token)
     if (!invitation) {

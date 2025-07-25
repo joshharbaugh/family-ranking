@@ -5,13 +5,12 @@ import {
   User,
   signInWithPopup,
   signInWithEmailAndPassword,
-  // signInAnonymously,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
-  // sendSignInLinkToEmail,
   sendPasswordResetEmail,
+  UserCredential,
 } from 'firebase/auth'
 import { auth, googleProvider, db } from '@/lib/firebase'
 import {
@@ -33,13 +32,11 @@ interface AuthContextType {
   error: string | null
   signInWithGoogle: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
-  // signInWithAnon: () => Promise<User>
   signUpWithEmail: (
     email: string,
     password: string,
     displayName: string
-  ) => Promise<void>
-  sendEmailLink: (email: string) => Promise<void>
+  ) => Promise<UserCredential | undefined>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   clearError: () => void
@@ -184,23 +181,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  // const signInWithAnon = async (): Promise<User> => {
-  //   try {
-  //     setError(null)
-  //     setLoading(true)
-  //     await signInAnonymously(auth)
-  //     return auth.currentUser as User
-  //   } catch (err: unknown) {
-  //     throw err
-  //   }
-  // }
-
   // Sign up with email/password
   const signUpWithEmail = async (
     email: string,
     password: string,
     displayName: string
-  ) => {
+  ): Promise<UserCredential | undefined> => {
     try {
       setError(null)
       setLoading(true)
@@ -211,32 +197,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await updateProfile(result.user, { displayName })
       }
       // Profile creation and theme sync will be handled by onAuthStateChanged
+      return result
     } catch (err: unknown) {
       const error = err as Error
       console.error('Sign-up error:', error)
       setError(error.message || 'Failed to create account')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const sendEmailLink = async (email: string) => {
-    try {
-      setError(null)
-      setLoading(true)
-      console.log(
-        email,
-        auth,
-        `${window.location.origin}/signin?email=${email}`
-      )
-      // await sendSignInLinkToEmail(auth, email, {
-      //   url: `${window.location.origin}/signin?email=${email}`,
-      //   handleCodeInApp: true,
-      // })
-    } catch (err: unknown) {
-      const error = err as Error
-      console.error('Send email link error:', error)
-      setError(error.message || 'Failed to send email link')
     } finally {
       setLoading(false)
     }
@@ -276,9 +241,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     signInWithGoogle,
     signInWithEmail,
-    // signInWithAnon,
     signUpWithEmail,
-    sendEmailLink,
     logout,
     resetPassword,
     clearError,

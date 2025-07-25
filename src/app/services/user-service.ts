@@ -38,7 +38,7 @@ export class UserService {
   }
 
   // Create user profile
-  async createUserProfile(
+  static async createUserProfile(
     uid: string,
     email: string,
     familyId: string,

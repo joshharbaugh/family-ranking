@@ -1,18 +1,18 @@
 import { useState } from 'react'
+import { User } from 'firebase/auth'
+import { useAuth } from '@/app/hooks/useAuth'
 import { InvitationService } from '@/app/services/invitation-service'
 import { EmailService } from '@/app/services/email-service'
-import { UserService } from '@/app/services/user-service'
-import { createUserWithEmailAndPassword, User } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
 import { FamilyRole } from '@/lib/definitions/family'
+import { FamilyService } from '@/app/services/family-service'
 
 export const useInvitation = () => {
+  const { signUpWithEmail } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const invitationService = new InvitationService()
   const emailService = new EmailService()
-  const userService = new UserService()
 
   const sendInvitation = async (
     email: string,
@@ -33,19 +33,29 @@ export const useInvitation = () => {
         familyName,
         role
       )
-      await emailService.sendInvitationEmail(
+      const status = await emailService.sendInvitationEmail(
         email,
         token,
         familyName,
         inviterName,
         role
       )
-      return { success: true, token }
+
+      return Promise.allSettled([token, status])
+        .then(() => {
+          return { success: status === 200, token }
+        })
+        .catch((err) => {
+          const errorMessage =
+            err instanceof Error ? err.message : 'Failed to send invitation'
+          setError(errorMessage)
+          return { success: false, error: errorMessage, token: null }
+        })
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to send invitation'
       setError(errorMessage)
-      return { success: false, error: errorMessage }
+      return { success: false, error: errorMessage, token: null }
     } finally {
       setLoading(false)
     }
@@ -73,8 +83,9 @@ export const useInvitation = () => {
 
   const completeInvitation = async (
     token: string,
-    password: string
-  ): Promise<User> => {
+    password: string,
+    displayName: string
+  ): Promise<User | undefined> => {
     setLoading(true)
     setError(null)
 
@@ -85,26 +96,26 @@ export const useInvitation = () => {
         throw new Error('Invalid invitation')
       }
 
-      // Create Firebase Auth user
-      // TODO: Wire into existing AuthProvider
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      // Create Firebase Auth and Firestore users
+      const userCredential = await signUpWithEmail(
         invitation.email,
-        password
+        password,
+        displayName
       )
 
-      // Create user profile in Firestore
-      await userService.createUserProfile(
-        userCredential.user.uid,
-        invitation.email,
-        invitation.familyId,
-        invitation.role
-      )
+      if (userCredential && userCredential.user) {
+        // Mark invitation as accepted
+        await invitationService.acceptInvitation(token)
 
-      // Mark invitation as accepted
-      await invitationService.acceptInvitation(token)
+        // Add the user to the family
+        await FamilyService.addFamilyMember(
+          invitation.familyId,
+          userCredential.user.uid,
+          invitation.role || 'other'
+        )
 
-      return userCredential.user
+        return userCredential.user
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to complete registration'

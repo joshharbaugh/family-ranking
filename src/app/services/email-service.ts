@@ -7,10 +7,9 @@ export class EmailService {
     familyName: string,
     inviterName?: string,
     role?: FamilyRole
-  ): Promise<void> {
+  ): Promise<number> {
     const inviteLink = `${window.location.origin}/signin?token=${token}&email=${encodeURIComponent(email)}`
 
-    // TODO: Example API call - need to implement backend endpoint
     const response = await fetch('/api/send-invitation', {
       method: 'POST',
       headers: {
@@ -28,5 +27,7 @@ export class EmailService {
     if (!response.ok) {
       throw new Error('Failed to send invitation email')
     }
+
+    return response.status
   }
 }

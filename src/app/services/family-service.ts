@@ -14,6 +14,7 @@ import {
 import { db } from '@/lib/firebase'
 import { Family, FamilyMemberRole, FamilyRole } from '@/lib/definitions/family'
 import { UserProfile } from '@/lib/definitions/user'
+import { UserService } from '@/app/services/user-service'
 import { v4 as uuidv4 } from 'uuid'
 
 export class FamilyService {
@@ -336,9 +337,28 @@ export class FamilyService {
     try {
       const memberRoles = await this.getFamilyMemberRoles(familyId)
 
-      // Eventually, we would fetch user profiles for each member
-      // For now, we'll return just the member roles
-      return memberRoles
+      // For each memberRole, fetch the user profile and attach it
+      const membersWithProfiles = await Promise.all(
+        memberRoles.map(async (memberRole) => {
+          try {
+            const userProfile = await UserService.getUserProfile(
+              memberRole.userId
+            )
+            return {
+              ...memberRole,
+              ...userProfile,
+            }
+          } catch (error) {
+            console.error(error)
+            // If user profile fetch fails, just return the memberRole without userProfile
+            return {
+              ...memberRole,
+            }
+          }
+        })
+      )
+      console.log(membersWithProfiles)
+      return membersWithProfiles
     } catch (error) {
       console.error('Error fetching family members with details:', error)
       throw new Error('Failed to fetch family members with details')

@@ -178,7 +178,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required={mode === 'signup'}
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 py-2"
                         placeholder="John Doe"
                       />
                     </div>
@@ -205,7 +205,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 py-2"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -234,7 +234,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10"
+                        className="pl-10 pr-10 py-2"
                         placeholder={
                           mode === 'signup'
                             ? 'At least 6 characters'
@@ -277,7 +277,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 py-2"
                         placeholder="Confirm your password"
                       />
                     </div>

@@ -82,7 +82,6 @@ export const useFamilyStore = create<FamilyStore>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const families = await FamilyService.getUserFamilies(userId)
-      console.log('[FamilyStore] fetchUserFamilies', families)
       set({ families, loading: false })
     } catch (error) {
       const errorMessage =

@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import { useUserSearch } from '@/app/hooks/useUserSearch'
-import { Search, User, Mail, Sparkles, Clock, X } from 'lucide-react'
+import { Search, Mail, X, User, Sparkles, Clock } from 'lucide-react'
+import { SearchResult } from '@/lib/definitions'
 import { UserProfile } from '@/lib/definitions/user'
 import Image from 'next/image'
+// import Button from '@/lib/ui/button'
+// import Select from '@/lib/ui/select'
 
 interface UserSearchProps {
   currentUserId: string
@@ -11,11 +14,6 @@ interface UserSearchProps {
   className?: string
   showSuggestions?: boolean
   maxResults?: number
-}
-
-interface SearchResult extends UserProfile {
-  _score?: number
-  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial'
 }
 
 export function UserSearch({
@@ -97,8 +95,12 @@ export function UserSearch({
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full pl-10 pr-10 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
+        {/* Loading Indicator */}
+        {loading && (
+          <div className="absolute top-1/2 right-8 transform -translate-y-1/2 animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+        )}
         {query && (
           <button
             onClick={() => {
@@ -112,31 +114,21 @@ export function UserSearch({
         )}
       </div>
 
-      {/* Loading Indicator */}
-      {loading && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-          <div className="flex items-center justify-center text-gray-500">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-            Searching...
-          </div>
-        </div>
-      )}
-
       {/* Error Message */}
       {!loading && error && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow-lg z-10">
           <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
         </div>
       )}
 
       {/* Search Results */}
       {!loading && results.length > 0 && !error && (
-        <div className="relative top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 z-10 max-h-[200px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10 max-h-[200px] overflow-y-auto">
           {results.map((user) => (
             <div
               key={user.uid}
               onClick={() => handleUserSelect(user)}
-              className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+              className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/35 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
             >
               <div className="flex items-center space-x-3">
                 {/* User Avatar */}
@@ -159,7 +151,7 @@ export function UserSearch({
                 {/* User Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
                       {user.displayName}{' '}
                       {user.uid === currentUserId && (
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -202,6 +194,35 @@ export function UserSearch({
                     </div>
                   </div>
                 )}
+
+                {/* <div className="flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleUserSelect(user)}
+                    disabled={user.uid === currentUserId}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Select
+                    label="Role"
+                    name="role"
+                    value={user.role || 'other'}
+                    items={[
+                      { label: 'Parent', value: 'parent' },
+                      { label: 'Guardian', value: 'guardian' },
+                      { label: 'Child', value: 'child' },
+                      { label: 'Grandmother', value: 'grandmother' },
+                      { label: 'Grandfather', value: 'grandfather' },
+                      { label: 'Aunt', value: 'aunt' },
+                      { label: 'Uncle', value: 'uncle' },
+                      { label: 'Cousin', value: 'cousin' },
+                      { label: 'Sibling', value: 'sibling' },
+                      { label: 'Other', value: 'other' },
+                    ]}
+                    onValueChange={(value) => (user.role = value as FamilyRole)}
+                    className="z-100"
+                  />
+                </div> */}
               </div>
             </div>
           ))}

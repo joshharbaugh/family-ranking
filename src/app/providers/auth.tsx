@@ -5,10 +5,12 @@ import {
   User,
   signInWithPopup,
   signInWithEmailAndPassword,
+  // signInAnonymously,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendSignInLinkToEmail,
   sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider, db } from '@/lib/firebase'
@@ -22,7 +24,7 @@ import {
 import { useUserStore } from '@/app/store/user-store'
 import { UserProfile } from '@/lib/definitions/user'
 import { useThemeStore } from '@/app/store/theme-store'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { UpstashService } from '@/app/services/upstash-service'
 
 interface AuthContextType {
@@ -31,11 +33,13 @@ interface AuthContextType {
   error: string | null
   signInWithGoogle: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
+  // signInWithAnon: () => Promise<User>
   signUpWithEmail: (
     email: string,
     password: string,
     displayName: string
   ) => Promise<void>
+  sendEmailLink: (email: string) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   clearError: () => void
@@ -55,6 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const segment = useSelectedLayoutSegment()
 
   // Upsert user profile in Firestore and Upstash
   const upsertUserProfile = async (user: User) => {
@@ -116,7 +121,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (user?.uid === firebaseUser?.uid) return
+      if (!!user?.uid && !!firebaseUser?.uid && user?.uid === firebaseUser?.uid)
+        return
       try {
         setLoading(true)
 
@@ -129,7 +135,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           setUser(null)
           setUserProfile(null)
-          router.push('/search') // Redirect to search page if user is not logged in
+
+          if (segment !== 'signin') router.push('/search') // Redirect to search page if user is not logged in
         }
       } catch (err) {
         console.error('Error handling auth state change:', err)
@@ -177,6 +184,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // const signInWithAnon = async (): Promise<User> => {
+  //   try {
+  //     setError(null)
+  //     setLoading(true)
+  //     await signInAnonymously(auth)
+  //     return auth.currentUser as User
+  //   } catch (err: unknown) {
+  //     throw err
+  //   }
+  // }
+
   // Sign up with email/password
   const signUpWithEmail = async (
     email: string,
@@ -197,6 +215,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const error = err as Error
       console.error('Sign-up error:', error)
       setError(error.message || 'Failed to create account')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const sendEmailLink = async (email: string) => {
+    try {
+      setError(null)
+      setLoading(true)
+      console.log(
+        email,
+        auth,
+        `${window.location.origin}/signin?email=${email}`
+      )
+      // await sendSignInLinkToEmail(auth, email, {
+      //   url: `${window.location.origin}/signin?email=${email}`,
+      //   handleCodeInApp: true,
+      // })
+    } catch (err: unknown) {
+      const error = err as Error
+      console.error('Send email link error:', error)
+      setError(error.message || 'Failed to send email link')
     } finally {
       setLoading(false)
     }
@@ -236,7 +276,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     signInWithGoogle,
     signInWithEmail,
+    // signInWithAnon,
     signUpWithEmail,
+    sendEmailLink,
     logout,
     resetPassword,
     clearError,

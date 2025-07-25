@@ -14,6 +14,9 @@ export async function POST(req: Request) {
   }
 
   const results = await index.search({ query, limit })
+  const filteredResults = results
+    .filter((result) => result.score > 0)
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
 
-  return new Response(JSON.stringify(results))
+  return new Response(JSON.stringify(filteredResults))
 }

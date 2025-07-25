@@ -40,7 +40,7 @@ function Select({
         </UiSelect.Icon>
       </UiSelect.Trigger>
       <UiSelect.Portal>
-        <UiSelect.Content className="overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+        <UiSelect.Content className="overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 z-100">
           <UiSelect.Viewport className="p-[5px]">
             {items &&
               items.map((item, idx) => (

@@ -2,17 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { UserService } from '@/app/services/user-service'
-import { UserProfile } from '@/lib/definitions/user'
+import { SearchResult } from '@/lib/definitions'
 
 interface UseUserSearchOptions {
   debounceMs?: number
   minSearchLength?: number
   maxResults?: number
-}
-
-interface SearchResult extends UserProfile {
-  _score?: number
-  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial'
 }
 
 interface UseUserSearchReturn {

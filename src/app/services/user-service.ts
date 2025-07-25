@@ -11,8 +11,10 @@ import {
   writeBatch,
   serverTimestamp,
   Timestamp,
+  setDoc,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { FamilyRole } from '@/lib/definitions/family'
 import { UserProfile } from '@/lib/definitions/user'
 import { UpstashService } from '@/app/services/upstash-service'
 
@@ -33,6 +35,33 @@ export class UserService {
       console.warn('Upstash not available, falling back to Firestore search')
       return false
     }
+  }
+
+  // Create user profile
+  async createUserProfile(
+    uid: string,
+    email: string,
+    familyId: string,
+    role: FamilyRole = 'other'
+  ): Promise<void> {
+    const userProfile: Omit<UserProfile, 'displayName'> = {
+      uid,
+      email,
+      family: {
+        familyId,
+        role,
+      },
+      favoriteGenres: [],
+      updatedAt: serverTimestamp() as Timestamp,
+      createdAt: serverTimestamp() as Timestamp,
+      settings: { theme: 'light' },
+    }
+
+    await setDoc(UserService.getUserProfileRef(uid), {
+      ...userProfile,
+      createdAt: serverTimestamp() as Timestamp,
+      updatedAt: serverTimestamp() as Timestamp,
+    })
   }
 
   // Get user profile by ID
@@ -69,6 +98,7 @@ export class UserService {
             searchTerm,
             limitCount
           )
+          console.log('Upstash Results', results)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return results.map((result: any) => result.content as UserProfile)
         } catch (upstashError) {
@@ -107,7 +137,6 @@ export class UserService {
 
       const snapshot = await getDocs(q)
       const results = snapshot.docs.map((doc) => doc.data() as UserProfile)
-      console.log('Results', results)
 
       // If we don't have enough results with prefix matching, try substring matching
       if (results.length < limitCount && normalizedSearchTerm.length > 2) {

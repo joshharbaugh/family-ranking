@@ -7,8 +7,8 @@ export interface UserProfile {
   email: string | null
   displayName: string
   displayNameLower?: string // Lowercase version for search indexing
-  bio: string
-  photoURL: string | null
+  bio?: string
+  photoURL?: string | null
   favoriteGenres: string[]
   createdAt: Timestamp // Firestore Timestamp
   updatedAt: Timestamp // Firestore Timestamp

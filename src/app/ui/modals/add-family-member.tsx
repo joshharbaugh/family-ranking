@@ -2,13 +2,19 @@
 
 import React, { useState } from 'react'
 import { X, Users, Save, Loader2 } from 'lucide-react'
+import { UserService } from '@/app/services/user-service'
+import { useInvitation } from '@/app/hooks/useInvitation'
 import { useFamilyStore } from '@/app/store/family-store'
-// import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/app/store/user-store'
+import { Invitation } from '@/lib/definitions'
 import { FamilyRole } from '@/lib/definitions/family'
-import { UserSearch } from '@/app/ui/user-search'
-import { UserProfile } from '@/lib/definitions/user'
 import Modal from '@/lib/ui/modal'
 import Button from '@/lib/ui/button'
+import Select from '@/lib/ui/select'
+// import { useAuth } from '@/app/hooks/useAuth'
+// import { v4 as uuidv4 } from 'uuid'
+// import { auth } from '@/lib/firebase'
+// import { signInAnonymously, sendSignInLinkToEmail } from 'firebase/auth'
 
 interface AddFamilyMemberModalProps {
   currentUserId: string
@@ -23,42 +29,133 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  // const { sendEmailLink } = useAuth()
   const { addFamilyMember, clearError, currentFamily, loading, error } =
     useFamilyStore()
-  // const { users, loading: usersLoading, error: usersError, fetchUsersByName } = useUserStore();
-  const [userId, setUserId] = useState('')
-  const [role] = useState<FamilyRole>('other')
-  // const [search, setSearch] = useState('');
+  const {
+    loading: inviteLoading,
+    error: inviteError,
+    sendInvitation,
+  } = useInvitation()
+  const { user } = useUserStore()
+  const [email, setEmail] = useState<string>('')
+  const [pendingInvites, setPendingInvites] = useState<Invitation[]>([])
 
-  // Search for users
-  // useEffect(() => {
-  //   if (search) {
-  //     // Debounce fetchUsersByName
-  //     const handler = setTimeout(() => {
-  //       fetchUsersByName(search);
-  //     }, 400);
-  //     return () => clearTimeout(handler);
-  //   }
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [search]);
+  const handleAddByEmail = async (email: string) => {
+    if (!currentFamily || !user) return
+    try {
+      setEmail('')
 
-  const handleUserSelect = (user: UserProfile) => {
-    setUserId(user.uid)
+      // Fetch existing user profile by email
+      const users = await UserService.getUsersByName(email)
+      const existingUser = users.find(
+        (user) => user.email === email && user.uid !== currentUserId
+      )
+      if (!existingUser) {
+        setPendingInvites([
+          ...pendingInvites,
+          {
+            email,
+            role: 'other',
+            familyId: currentFamily.id,
+            invitedBy: user.email,
+          },
+        ])
+      } else {
+        setPendingInvites([
+          ...pendingInvites,
+          {
+            id: existingUser.uid,
+            email,
+            role: 'other',
+            familyId: currentFamily.id,
+            invitedBy: user.email,
+          },
+        ])
+      }
+    } catch (error) {
+      console.error('Error adding by email', error)
+    }
+  }
+
+  const handleInvite = async (invite: Invitation) => {
+    if (!invite.email.trim() || !currentFamily || !user || !user.displayName)
+      return
+
+    console.log(
+      invite.email.trim(),
+      currentFamily?.id,
+      currentUserId,
+      currentFamily?.name,
+      user?.displayName,
+      invite.role
+    )
+
+    try {
+      setPendingInvites(
+        pendingInvites.map((pendingInvite) =>
+          pendingInvite.email === invite.email
+            ? { ...pendingInvite, status: 'sent' }
+            : pendingInvite
+        )
+      )
+    } catch (error) {
+      console.error('Error changing invite status', error)
+    }
+
+    // const result = await sendInvitation(
+    //   invite.email.trim(),
+    //   currentFamily.id,
+    //   currentUserId,
+    //   currentFamily.name,
+    //   user.displayName,
+    //   invite.role
+    // )
+
+    // if (result.success) {
+    //   console.log(result)
+    // }
+  }
+
+  const handleRemoveEmail = (email: string) => {
+    try {
+      setPendingInvites(
+        pendingInvites.filter((invite) => invite.email !== email)
+      )
+    } catch (error) {
+      console.error('Error removing email', error)
+    }
+  }
+
+  const handleRoleChange = (email: string, role: FamilyRole) => {
+    try {
+      setPendingInvites(
+        pendingInvites.map((invite) =>
+          invite.email === email ? { ...invite, role } : invite
+        )
+      )
+    } catch (error) {
+      console.error('Error changing role', error)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent, close: () => void) => {
     e.preventDefault()
 
-    if (!currentFamily?.id) {
+    if (!currentFamily?.id || pendingInvites.length === 0) {
       return
     }
 
     try {
-      await addFamilyMember(currentFamily.id, userId, role as FamilyRole)
+      for (const invite of pendingInvites) {
+        console.log('Invite: ', currentFamily.id, invite)
+        // await addFamilyMember(currentFamily.id, invite.userId, invite.role)
+      }
+
       handleClose(close)
       onSuccess?.()
-    } catch {
-      // Error is handled by the store
+    } catch (error) {
+      console.error('Error submitting', error)
     }
   }
 
@@ -70,10 +167,7 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <Modal
-      onClose={onClose}
-      containerClassName="max-w-md w-full max-h-[90vh] overflow-y-auto"
-    >
+    <Modal onClose={onClose} containerClassName="max-w-md w-full">
       {(close) => (
         <>
           {/* Header */}
@@ -93,56 +187,98 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
             </button>
           </div>
 
-          {/* Search for users */}
-          <UserSearch
-            currentUserId={currentUserId}
-            onUserSelect={handleUserSelect}
-          />
-
           {/* Form */}
-          {userId && (
-            <form
-              onSubmit={(e) => handleSubmit(e, close)}
-              className="p-6 space-y-4"
-            >
-              {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-600 dark:text-red-400">
-                    {error}
-                  </p>
+          <form className="p-6 space-y-4">
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label
+                htmlFor="invite-by-email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Invite by email
+              </label>
+              <div className="flex justify-between gap-4">
+                <input
+                  id="invite-by-email"
+                  type="text"
+                  value={email}
+                  placeholder="Enter email address"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
+                  required
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => handleAddByEmail(email)}
+                  disabled={!email.trim()}
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              {pendingInvites.map((invite) => (
+                <div
+                  key={invite.email}
+                  className="flex justify-between gap-4 items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/35 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                >
+                  <div className="text-sm text-gray-900 dark:text-white truncate">
+                    {invite.email}
+                  </div>
+                  <Select
+                    label="Role"
+                    name="invited-role"
+                    value={invite.role || 'other'}
+                    items={[
+                      { label: 'Parent', value: 'parent' },
+                      { label: 'Guardian', value: 'guardian' },
+                      { label: 'Child', value: 'child' },
+                      { label: 'Grandmother', value: 'grandmother' },
+                      { label: 'Grandfather', value: 'grandfather' },
+                      { label: 'Aunt', value: 'aunt' },
+                      { label: 'Uncle', value: 'uncle' },
+                      { label: 'Cousin', value: 'cousin' },
+                      { label: 'Sibling', value: 'sibling' },
+                      { label: 'Other', value: 'other' },
+                    ]}
+                    onValueChange={(value) =>
+                      handleRoleChange(invite.email, value as FamilyRole)
+                    }
+                    disabled={invite.status === 'sent'}
+                  />
+                  {!invite.id && (
+                    <Button
+                      type="button"
+                      variant={
+                        invite.status === 'sent' ? 'secondary' : 'outline'
+                      }
+                      onClick={() => handleInvite(invite)}
+                      disabled={invite.status === 'sent'}
+                    >
+                      {invite.status === 'sent' ? 'Sent' : 'Invite'}
+                    </Button>
+                  )}
+                  {invite.id && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleRemoveEmail(invite.email)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
-              )}
-
-              {/* <div>
-            <label htmlFor="family-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Name *
-            </label>
-            <input
-              id="family-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter family name"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"
-              required
-            />
-          </div> */}
-
-              {/* <div>
-            <label htmlFor="family-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description (Optional)
-            </label>
-            <textarea
-              id="family-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell us about your family..."
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100 resize-none"
-            />
-          </div> */}
-            </form>
-          )}
+              ))}
+            </div>
+          </form>
 
           {/* Footer */}
           <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
@@ -156,13 +292,13 @@ export const AddFamilyMemberModal: React.FC<AddFamilyMemberModalProps> = ({
             <Button
               type="submit"
               onClick={(e) => handleSubmit(e, close)}
-              disabled={loading || !userId.trim()}
+              disabled={loading}
               className="flex items-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Adding...
+                  Saving...
                 </>
               ) : (
                 <>

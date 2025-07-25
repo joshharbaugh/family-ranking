@@ -1,4 +1,6 @@
 import { Timestamp } from 'firebase/firestore'
+import { FamilyRole } from '@/lib/definitions/family'
+import { UserProfile } from '@/lib/definitions/user'
 
 export type MediaType = 'movie' | 'tv' | 'book' | 'game' | 'music'
 
@@ -171,6 +173,12 @@ export interface SearchResultsGames {
   allowance_refresh_timer?: number
 }
 
+export interface SearchResult extends UserProfile {
+  _score?: number
+  relevance?: 'exact' | 'prefix' | 'fuzzy' | 'partial'
+  role?: FamilyRole
+}
+
 export interface Ranking {
   id: string
   mediaId: string
@@ -180,4 +188,16 @@ export interface Ranking {
   userId?: string
   createdAt?: Timestamp // Firestore Timestamp
   updatedAt?: Timestamp // Firestore Timestamp
+}
+
+export interface Invitation {
+  id?: string
+  email: string
+  familyId: string
+  invitedBy: string | null
+  status?: 'sent' | 'pending' | 'accepted'
+  token?: string
+  createdAt?: Timestamp
+  familyName?: string // Optional for email context
+  role?: FamilyRole // Optional (default: other)
 }

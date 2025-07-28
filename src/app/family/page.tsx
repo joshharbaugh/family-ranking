@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic'
 import Loading from '@/lib/ui/loading'
 import { Family } from '@/lib/definitions/family'
 import { FamilyCard } from './ui/family-card'
+import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 
 const FamilyOverview = dynamic(
   () => import('@/app/family/ui/overview'),
@@ -109,27 +110,94 @@ const FamilyPage: React.FC = () => {
 
   if (!loading && !familiesLoading && families.length === 0) {
     return (
-      <div className="space-y-6">
-        {/* Empty State */}
-        <div className="text-center py-16">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-            <Users className="w-10 h-10 text-gray-400" />
+      <ProtectedRoute>
+        <div className="space-y-6">
+          {/* Empty State */}
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+              <Users className="w-10 h-10 text-gray-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              No families yet!
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
+              Create a family to start sharing rankings and experiences with
+              your loved ones.
+            </p>
+            <button
+              onClick={handleShowCreateModal}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Family
+            </button>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            No families yet!
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-            Create a family to start sharing rankings and experiences with your
-            loved ones.
-          </p>
+
+          {/* Create Family Modal (dynamic) */}
+          {user?.uid && (
+            <Suspense>
+              <CreateFamilyModal
+                currentUserId={user.uid}
+                isOpen={showCreateModal}
+                isNewFamily={true}
+                onClose={handleCloseCreateModal}
+                onSuccess={handleCreateSuccess}
+              />
+            </Suspense>
+          )}
+        </div>
+      </ProtectedRoute>
+    )
+  }
+
+  return (
+    <ProtectedRoute>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Family
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
+              Manage your family profiles and settings
+            </p>
+          </div>
+
           <button
             onClick={handleShowCreateModal}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
           >
-            <Plus className="w-5 h-5" />
-            Create Your First Family
+            <Plus className="w-4 h-4" />
+            Create Family
           </button>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Family Selection */}
+        {families.length > 1 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              Select Family
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {familyCards}
+            </div>
+          </div>
+        )}
+
+        {/* Current Family Overview (dynamic) */}
+        {currentFamily && user && (
+          <Suspense fallback={<FamilyOverviewSkeleton />}>
+            <FamilyOverview family={currentFamily} currentUserId={user.uid} />
+          </Suspense>
+        )}
 
         {/* Create Family Modal (dynamic) */}
         {user?.uid && (
@@ -144,70 +212,7 @@ const FamilyPage: React.FC = () => {
           </Suspense>
         )}
       </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Family
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Manage your family profiles and settings
-          </p>
-        </div>
-
-        <button
-          onClick={handleShowCreateModal}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Create Family
-        </button>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-
-      {/* Family Selection */}
-      {families.length > 1 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Select Family
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {familyCards}
-          </div>
-        </div>
-      )}
-
-      {/* Current Family Overview (dynamic) */}
-      {currentFamily && user && (
-        <Suspense fallback={<FamilyOverviewSkeleton />}>
-          <FamilyOverview family={currentFamily} currentUserId={user.uid} />
-        </Suspense>
-      )}
-
-      {/* Create Family Modal (dynamic) */}
-      {user?.uid && (
-        <Suspense>
-          <CreateFamilyModal
-            currentUserId={user.uid}
-            isOpen={showCreateModal}
-            isNewFamily={true}
-            onClose={handleCloseCreateModal}
-            onSuccess={handleCreateSuccess}
-          />
-        </Suspense>
-      )}
-    </div>
+    </ProtectedRoute>
   )
 }
 

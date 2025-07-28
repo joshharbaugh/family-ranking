@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react'
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  Suspense,
+} from 'react'
 import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react'
 import { Media, Ranking } from '@/lib/definitions/index'
 import { UserStats } from '@/lib/definitions/user'
@@ -10,6 +16,7 @@ import Select from '@/lib/ui/select'
 import Image from 'next/image'
 import { RankingsSkeleton } from '@/app/ui/skeletons'
 import dynamic from 'next/dynamic'
+import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 
 type SortOption = 'rank-desc' | 'rank-asc' | 'date-desc' | 'date-asc' | 'title'
 type FilterOption = 'all' | 'movie' | 'tv' | 'book' | 'game'
@@ -92,22 +99,28 @@ const RankingsPage = (): React.ReactNode => {
     fetchStats()
   }, [getUserStats, rankings])
 
-  const handleDelete = useCallback((id: string) => {
-    deleteRanking(id)
-    setShowDeleteConfirm(null)
-  }, [deleteRanking])
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteRanking(id)
+      setShowDeleteConfirm(null)
+    },
+    [deleteRanking]
+  )
 
   const handleEdit = useCallback((ranking: Ranking) => {
     setExistingRanking(ranking)
     setShowAddModal(true)
   }, [])
 
-  const handleSave = useCallback((ranking: Ranking) => {
-    addRanking(ranking.rank, ranking.notes, ranking.media)
-    setShowAddModal(false)
-    setSelectedMedia(null)
-    setExistingRanking(null)
-  }, [addRanking])
+  const handleSave = useCallback(
+    (ranking: Ranking) => {
+      addRanking(ranking.rank, ranking.notes, ranking.media)
+      setShowAddModal(false)
+      setSelectedMedia(null)
+      setExistingRanking(null)
+    },
+    [addRanking]
+  )
 
   const handleSortChange = useCallback((value: string) => {
     setSortBy(value as SortOption)
@@ -123,23 +136,26 @@ const RankingsPage = (): React.ReactNode => {
 
   if (rankings.length === 0) {
     return (
-      <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-          <Trophy className="w-10 h-10 text-gray-400" />
+      <ProtectedRoute>
+        <div className="text-center py-16">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+            <Trophy className="w-10 h-10 text-gray-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            No rankings yet!
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+            Search for your favorite movies, TV shows, books, and games to start
+            building your personal rankings.
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          No rankings yet!
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Search for your favorite movies, TV shows, books, and games to start
-          building your personal rankings.
-        </p>
-      </div>
+      </ProtectedRoute>
     )
   }
 
   return (
-    <>
+    <ProtectedRoute>
+      {}
       {/* Add Ranking Modal (dynamic) */}
       {showAddModal && (selectedMedia || existingRanking) && (
         <Suspense>
@@ -411,7 +427,7 @@ const RankingsPage = (): React.ReactNode => {
           })}
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   )
 }
 

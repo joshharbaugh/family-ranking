@@ -7,12 +7,16 @@ interface ModalProps {
   onClose: () => void
   children: React.ReactNode | ((close: () => void) => React.ReactNode)
   containerClassName?: string
+  title?: string
+  description?: string
 }
 
 export default function Modal({
   onClose,
   children,
   containerClassName,
+  title,
+  description,
 }: ModalProps) {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -52,7 +56,9 @@ export default function Modal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
+      aria-labelledby={title ? "modal-title" : undefined}
+      aria-describedby={description ? "modal-description" : undefined}
+      aria-label={!title ? "Modal dialog" : undefined}
       className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
@@ -64,6 +70,16 @@ export default function Modal({
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
         } ${containerClassName || ''}`}
       >
+        {title && (
+          <div id="modal-title" className="sr-only">
+            {title}
+          </div>
+        )}
+        {description && (
+          <div id="modal-description" className="sr-only">
+            {description}
+          </div>
+        )}
         {typeof children === 'function'
           ? (children as (c: () => void) => React.ReactNode)(close)
           : children}

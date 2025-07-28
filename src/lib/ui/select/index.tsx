@@ -1,4 +1,4 @@
-import { Select as UiSelect } from 'radix-ui'
+import * as UiSelect from '@radix-ui/react-select'
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons'
 
 interface SelectProps {

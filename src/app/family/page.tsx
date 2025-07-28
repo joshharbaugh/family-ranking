@@ -1,12 +1,20 @@
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  Suspense,
+} from 'react'
 import { Users, Plus } from 'lucide-react'
 import { useFamilyStore } from '@/app/store/family-store'
 import { useUserStore } from '@/app/store/user-store'
 import { FamilyOverviewSkeleton } from '@/app/ui/skeletons'
 import dynamic from 'next/dynamic'
 import Loading from '@/lib/ui/loading'
+import { Family } from '@/lib/definitions/family'
+import { FamilyCard } from './ui/family-card'
 
 const FamilyOverview = dynamic(
   () => import('@/app/family/ui/overview'),
@@ -33,38 +41,67 @@ const FamilyPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchFamilies = async () => {
-      if (!user?.uid) return
+  const fetchFamilies = useCallback(async () => {
+    if (!user?.uid) return
 
-      try {
-        setLoading(true)
-        await fetchUserFamilies(user.uid)
-      } catch (error) {
-        console.error('Error fetching user families:', error)
-      } finally {
-        setLoading(false)
-      }
+    try {
+      setLoading(true)
+      await fetchUserFamilies(user.uid)
+    } catch (error) {
+      console.error('Error fetching user families:', error)
+    } finally {
+      setLoading(false)
     }
-
-    if (user?.uid) fetchFamilies()
   }, [user?.uid, fetchUserFamilies])
 
   useEffect(() => {
+    if (user?.uid) fetchFamilies()
+  }, [user?.uid, fetchFamilies])
+
+  useEffect(() => {
     // If there is only one family, set it as the current family
-    if (families && families.length === 1) {
+    if (families && families.length === 1 && !currentFamily) {
       setCurrentFamily(families[0])
     }
+  }, [families, setCurrentFamily, currentFamily])
 
-    setTimeout(() => {
+  useEffect(() => {
+    if (families) {
       setLoading(false)
-    }, 600)
-  }, [families, setCurrentFamily])
+    }
+  }, [families])
 
-  const handleCreateSuccess = () => {
+  const handleCreateSuccess = useCallback(() => {
     // The store will automatically update with the new family
     setShowCreateModal(false)
-  }
+  }, [])
+
+  const handleShowCreateModal = useCallback(() => {
+    setShowCreateModal(true)
+  }, [])
+
+  const handleCloseCreateModal = useCallback(() => {
+    setShowCreateModal(false)
+  }, [])
+
+  const handleFamilySelect = useCallback(
+    (family: Family) => {
+      setCurrentFamily(family)
+    },
+    [setCurrentFamily]
+  )
+
+  const familyCards = useMemo(() => {
+    if (!families) return null
+    return families.map((family) => (
+      <FamilyCard
+        key={family.id}
+        family={family}
+        isSelected={currentFamily?.id === family.id}
+        onSelect={handleFamilySelect}
+      />
+    ))
+  }, [families, currentFamily?.id, handleFamilySelect])
 
   if (loading || familiesLoading) {
     return <Loading />
@@ -86,7 +123,7 @@ const FamilyPage: React.FC = () => {
             loved ones.
           </p>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={handleShowCreateModal}
             className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
           >
             <Plus className="w-5 h-5" />
@@ -101,7 +138,7 @@ const FamilyPage: React.FC = () => {
               currentUserId={user.uid}
               isOpen={showCreateModal}
               isNewFamily={true}
-              onClose={() => setShowCreateModal(false)}
+              onClose={handleCloseCreateModal}
               onSuccess={handleCreateSuccess}
             />
           </Suspense>
@@ -124,7 +161,7 @@ const FamilyPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={handleShowCreateModal}
           className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -146,29 +183,7 @@ const FamilyPage: React.FC = () => {
             Select Family
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {families.map((family) => (
-              <button
-                key={family.id}
-                onClick={() => setCurrentFamily(family)}
-                className={`p-4 rounded-lg border text-left transition-colors ${
-                  currentFamily?.id === family.id
-                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
-              >
-                <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                  {family.name}
-                </h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {family.memberIds.length} members
-                </p>
-                {family.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                    {family.description}
-                  </p>
-                )}
-              </button>
-            ))}
+            {familyCards}
           </div>
         </div>
       )}
@@ -187,7 +202,7 @@ const FamilyPage: React.FC = () => {
             currentUserId={user.uid}
             isOpen={showCreateModal}
             isNewFamily={true}
-            onClose={() => setShowCreateModal(false)}
+            onClose={handleCloseCreateModal}
             onSuccess={handleCreateSuccess}
           />
         </Suspense>

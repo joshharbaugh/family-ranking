@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useState, useCallback, useMemo } from 'react'
 import { Search, Film, Tv, Book, Loader2, Gamepad2 } from 'lucide-react'
 import { Media, MediaType, Ranking } from '@/lib/definitions/index'
 import { MediaCard } from '@/app/ui/media-card'
@@ -17,13 +17,7 @@ const RankingModal = dynamic(
 
 const SearchPage = (): React.ReactElement => {
   const { addRanking, rankings } = useRankings()
-  const {
-    searchMedia,
-    searchResults,
-    setSearchResults,
-    isLoading,
-    setIsLoading,
-  } = useSearch()
+  const { searchMedia, searchResults, isLoading, clearSearch } = useSearch()
   const [mediaType, setMediaType] = useState<MediaType>('movie')
   const [searchQuery, setSearchQuery] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
@@ -31,53 +25,82 @@ const SearchPage = (): React.ReactElement => {
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null)
   const [existingRanking, setExistingRanking] = useState<Ranking | null>(null)
 
-  const handleAddToRankings = (media: Media) => {
+  const handleAddToRankings = useCallback((media: Media) => {
     setSelectedMedia(media)
     setShowAddModal(true)
-  }
+  }, [])
 
-  const handleSaveRanking = (ranking: Ranking) => {
-    addRanking(ranking.rank, ranking.notes, ranking.media)
-    setShowAddModal(false)
-    setSelectedMedia(null)
-    setExistingRanking(null)
-  }
+  const handleSaveRanking = useCallback(
+    (ranking: Ranking) => {
+      addRanking(ranking.rank, ranking.notes, ranking.media)
+      setShowAddModal(false)
+      setSelectedMedia(null)
+      setExistingRanking(null)
+    },
+    [addRanking]
+  )
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSearch = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
 
-    if (!searchQuery.trim()) {
-      setSearchResults([])
+      if (!searchQuery.trim()) {
+        clearSearch()
+        setHasSearched(false)
+        return
+      }
+
+      setHasSearched(true)
+      // Use immediate search (no debounce) for manual form submission
+      searchMedia(mediaType, searchQuery, 0)
+    },
+    [searchQuery, mediaType, clearSearch, setHasSearched, searchMedia]
+  )
+
+  const handleMediaTypeChange = useCallback(
+    (type: MediaType) => {
+      setMediaType(type)
+      clearSearch()
       setHasSearched(false)
-      return
-    }
+    },
+    [clearSearch, setHasSearched]
+  )
 
-    setIsLoading(true)
-    setHasSearched(true)
+  const handleQueryChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setSearchQuery(value)
 
-    searchMedia(mediaType, searchQuery)
-  }
+      // Perform debounced search as user types
+      if (value.trim()) {
+        setHasSearched(true)
+        searchMedia(mediaType, value, 750) // 750ms debounce for typing
+      } else {
+        clearSearch()
+        setHasSearched(false)
+      }
+    },
+    [mediaType, searchMedia, clearSearch, setHasSearched]
+  )
 
-  const handleMediaTypeChange = (type: MediaType) => {
-    setMediaType(type)
-    setSearchResults([])
-    setHasSearched(false)
-  }
+  const getMediaIcon = useMemo(
+    // eslint-disable-next-line react/display-name
+    () => (type: MediaType) => {
+      switch (type) {
+        case 'movie':
+          return <Film className="w-4 h-4" />
+        case 'tv':
+          return <Tv className="w-4 h-4" />
+        case 'book':
+          return <Book className="w-4 h-4" />
+        case 'game':
+          return <Gamepad2 className="w-4 h-4" />
+      }
+    },
+    []
+  )
 
-  const getMediaIcon = (type: MediaType) => {
-    switch (type) {
-      case 'movie':
-        return <Film className="w-4 h-4" />
-      case 'tv':
-        return <Tv className="w-4 h-4" />
-      case 'book':
-        return <Book className="w-4 h-4" />
-      case 'game':
-        return <Gamepad2 className="w-4 h-4" />
-    }
-  }
-
-  const getPlaceholder = () => {
+  const placeholder = useMemo(() => {
     switch (mediaType) {
       case 'movie':
         return 'Search for movies...'
@@ -88,7 +111,17 @@ const SearchPage = (): React.ReactElement => {
       case 'game':
         return 'Search for games...'
     }
-  }
+  }, [mediaType])
+
+  const isRankedMap = useMemo(() => {
+    const map = new Map()
+    rankings.forEach((ranking) => {
+      if (ranking.media?.id) {
+        map.set(ranking.media.id, true)
+      }
+    })
+    return map
+  }, [rankings])
 
   return (
     <>
@@ -132,8 +165,8 @@ const SearchPage = (): React.ReactElement => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={getPlaceholder()}
+                onChange={handleQueryChange}
+                placeholder={placeholder}
                 className="w-full px-3 py-2 pr-12 focus:outline-none transition-all"
                 disabled={isLoading}
               />
@@ -188,9 +221,7 @@ const SearchPage = (): React.ReactElement => {
                   key={media.id}
                   media={media}
                   onAddToRankings={handleAddToRankings}
-                  isRanked={rankings.some(
-                    (ranking) => ranking.media?.id === media.id
-                  )}
+                  isRanked={isRankedMap.has(media.id)}
                 />
               ))}
             </div>

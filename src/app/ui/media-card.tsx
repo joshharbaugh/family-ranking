@@ -12,11 +12,11 @@ interface MediaCardProps {
   isRanked: boolean
 }
 
-export const MediaCard = ({
+export const MediaCard = React.memo(function MediaCard({
   media,
   onAddToRankings,
   isRanked,
-}: MediaCardProps): React.ReactNode => {
+}: MediaCardProps) {
   const Icon = getMediaIcon(media.type)
 
   return (
@@ -66,4 +66,4 @@ export const MediaCard = ({
       </div>
     </div>
   )
-}
+})

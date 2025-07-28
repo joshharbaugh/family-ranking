@@ -16,7 +16,7 @@ interface UserSearchProps {
   maxResults?: number
 }
 
-export function UserSearch({
+export const UserSearch = React.memo(function UserSearch({
   currentUserId,
   onUserSelect,
   placeholder = 'Search users...',
@@ -266,4 +266,4 @@ export function UserSearch({
         )}
     </div>
   )
-}
+})

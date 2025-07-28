@@ -70,7 +70,8 @@ export default function SignIn() {
     }
 
     if (token && typeof token === 'string') fetchInvitation()
-  }, [token, validateInvitation])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

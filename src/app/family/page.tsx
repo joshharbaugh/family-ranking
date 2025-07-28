@@ -62,11 +62,13 @@ const FamilyPage: React.FC = () => {
     if (families && families.length === 1 && !currentFamily) {
       setCurrentFamily(families[0])
     }
-
-    setTimeout(() => {
-      setLoading(false)
-    }, 600)
   }, [families, setCurrentFamily, currentFamily])
+
+  useEffect(() => {
+    if (families) {
+      setLoading(false)
+    }
+  }, [families])
 
   const handleCreateSuccess = useCallback(() => {
     // The store will automatically update with the new family

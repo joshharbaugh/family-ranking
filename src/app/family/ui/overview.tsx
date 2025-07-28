@@ -253,56 +253,60 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
             ))}
 
           {invitations &&
-            invitations.map((invitation: Invitation) => (
-              <div
-                key={invitation.token}
-                className={`flex items-center gap-4 p-4 rounded-lg border ${
-                  invitation.status === 'pending'
-                    ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/20'
-                    : 'border-gray-200 dark:border-gray-700'
-                }`}
-              >
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+            invitations
+              .filter(
+                (invitation: Invitation) => invitation.status === 'pending'
+              )
+              .map((invitation: Invitation) => (
+                <div
+                  key={invitation.token}
+                  className={`flex items-center gap-4 p-4 rounded-lg border ${
+                    invitation.status === 'pending'
+                      ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/20'
+                      : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                >
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                    </div>
                   </div>
-                </div>
-                {/* Member Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {invitation.email}
-                    </h4>
-                    <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">
-                      {invitation.status}
-                    </span>
-                    <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
-                      Invited on:{' '}
-                      {invitation.createdAt instanceof Date
-                        ? invitation.createdAt.toLocaleDateString()
-                        : invitation.createdAt &&
-                            typeof invitation.createdAt.toDate === 'function'
-                          ? invitation.createdAt.toDate().toLocaleDateString()
-                          : ''}
-                    </span>
-                  </div>
+                  {/* Member Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {invitation.email}
+                      </h4>
+                      <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">
+                        {invitation.status}
+                      </span>
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
+                        Invited on:{' '}
+                        {invitation.createdAt instanceof Date
+                          ? invitation.createdAt.toLocaleDateString()
+                          : invitation.createdAt &&
+                              typeof invitation.createdAt.toDate === 'function'
+                            ? invitation.createdAt.toDate().toLocaleDateString()
+                            : ''}
+                      </span>
+                    </div>
 
-                  <div className="flex items-center gap-2 mt-1">
-                    {invitation.role && (
-                      <span className="text-2xl">
-                        {getRoleIcon(invitation.role)}
-                      </span>
-                    )}
-                    {invitation.role && (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {getRoleLabel(invitation.role)}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      {invitation.role && (
+                        <span className="text-2xl">
+                          {getRoleIcon(invitation.role)}
+                        </span>
+                      )}
+                      {invitation.role && (
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {getRoleLabel(invitation.role)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
         </div>
       </div>
 

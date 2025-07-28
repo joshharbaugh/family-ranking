@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, Suspense } from 'react'
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react'
 import { Star, X, Trophy, Film, Tv, Book, Edit2, Gamepad2 } from 'lucide-react'
 import { Media, Ranking } from '@/lib/definitions/index'
 import { UserStats } from '@/lib/definitions/user'
@@ -92,22 +92,30 @@ const RankingsPage = (): React.ReactNode => {
     fetchStats()
   }, [getUserStats, rankings])
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     deleteRanking(id)
     setShowDeleteConfirm(null)
-  }
+  }, [deleteRanking])
 
-  const handleEdit = (ranking: Ranking) => {
+  const handleEdit = useCallback((ranking: Ranking) => {
     setExistingRanking(ranking)
     setShowAddModal(true)
-  }
+  }, [])
 
-  const handleSave = (ranking: Ranking) => {
+  const handleSave = useCallback((ranking: Ranking) => {
     addRanking(ranking.rank, ranking.notes, ranking.media)
     setShowAddModal(false)
     setSelectedMedia(null)
     setExistingRanking(null)
-  }
+  }, [addRanking])
+
+  const handleSortChange = useCallback((value: string) => {
+    setSortBy(value as SortOption)
+  }, [])
+
+  const handleFilterChange = useCallback((filterType: FilterOption) => {
+    setFilterBy(filterType)
+  }, [])
 
   if (loading || !stats) {
     return <RankingsSkeleton />
@@ -209,7 +217,7 @@ const RankingsPage = (): React.ReactNode => {
           {/* Filter Buttons */}
           <div className="flex gap-2 flex-1">
             <button
-              onClick={() => setFilterBy('all')}
+              onClick={() => handleFilterChange('all')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filterBy === 'all'
                   ? 'bg-indigo-600 text-white'
@@ -219,7 +227,7 @@ const RankingsPage = (): React.ReactNode => {
               All
             </button>
             <button
-              onClick={() => setFilterBy('movie')}
+              onClick={() => handleFilterChange('movie')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                 filterBy === 'movie'
                   ? 'bg-indigo-600 text-white'
@@ -231,7 +239,7 @@ const RankingsPage = (): React.ReactNode => {
               <span>({stats?.movieCount ?? 0})</span>
             </button>
             <button
-              onClick={() => setFilterBy('tv')}
+              onClick={() => handleFilterChange('tv')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                 filterBy === 'tv'
                   ? 'bg-indigo-600 text-white'
@@ -243,7 +251,7 @@ const RankingsPage = (): React.ReactNode => {
               <span>({stats?.tvCount ?? 0})</span>
             </button>
             <button
-              onClick={() => setFilterBy('book')}
+              onClick={() => handleFilterChange('book')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                 filterBy === 'book'
                   ? 'bg-indigo-600 text-white'
@@ -255,7 +263,7 @@ const RankingsPage = (): React.ReactNode => {
               <span>({stats?.bookCount ?? 0})</span>
             </button>
             <button
-              onClick={() => setFilterBy('game')}
+              onClick={() => handleFilterChange('game')}
               className={`pl-3 pr-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                 filterBy === 'game'
                   ? 'bg-indigo-600 text-white'
@@ -272,7 +280,7 @@ const RankingsPage = (): React.ReactNode => {
           <Select
             label="Sort by"
             name="sort-by"
-            onValueChange={(value: string) => setSortBy(value as SortOption)}
+            onValueChange={handleSortChange}
             value={sortBy}
             items={sortItems}
           />
@@ -310,6 +318,9 @@ const RankingsPage = (): React.ReactNode => {
                     width={80}
                     height={120}
                     className="w-16 h-24 sm:w-20 sm:h-30 object-cover rounded shadow-sm"
+                    loading="lazy"
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkrHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                   />
 
                   {/* Content */}

@@ -7,14 +7,15 @@ import {
   SearchResultsGames,
 } from '@/lib/definitions/index'
 import { searchBooks, searchGames, searchMovies, searchShows } from '@/app/api'
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { getGameBoxart } from '@/lib/utils'
 
 export const useSearch = () => {
   const [searchResults, setSearchResults] = useState<Media[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const searchMedia = async (mediaType: MediaType, query: string) => {
+  const performSearch = useCallback(async (mediaType: MediaType, query: string) => {
     setIsLoading(true)
 
     if (mediaType === 'movie') {
@@ -115,13 +116,40 @@ export const useSearch = () => {
     }
 
     setIsLoading(false)
-  }
+  }, [])
+
+  const searchMedia = useCallback((mediaType: MediaType, query: string, debounceMs: number = 500) => {
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Don't show loading immediately for debounced searches
+    if (debounceMs > 0) {
+      setIsLoading(true)
+    }
+
+    // Set up debounced search
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(mediaType, query)
+    }, debounceMs)
+  }, [performSearch])
+
+  const clearSearch = useCallback(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+    setSearchResults([])
+    setIsLoading(false)
+  }, [])
 
   return {
     searchMedia,
+    performSearch,
     searchResults,
     setSearchResults,
     isLoading,
     setIsLoading,
+    clearSearch,
   }
 }

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { UserService } from '@/app/services/user-service'
 import { SearchResult } from '@/lib/definitions'
+import { UserProfile } from '@/lib/definitions/user'
 
 interface UseUserSearchOptions {
   debounceMs?: number
@@ -36,6 +37,45 @@ export function useUserSearch(
     setResults([])
     setSuggestions([])
     setError(null)
+  }, [])
+
+  // Memoized scoring function for better performance
+  const calculateRelevanceScore = useMemo(() => {
+    return (displayName: string, searchTerm: string, user: UserProfile) => {
+      const displayNameLower = displayName.toLowerCase()
+      const searchTermLower = searchTerm.toLowerCase()
+
+      let relevance: SearchResult['relevance'] = 'partial'
+      let score = 0
+
+      // Determine relevance and score
+      if (displayNameLower === searchTermLower) {
+        relevance = 'exact'
+        score = 100
+      } else if (displayNameLower.startsWith(searchTermLower)) {
+        relevance = 'prefix'
+        score = 80
+      } else if (displayNameLower.includes(searchTermLower)) {
+        relevance = 'partial'
+        score = 60
+      } else {
+        // Fuzzy match (handled by Upstash)
+        relevance = 'fuzzy'
+        score = 40
+      }
+
+      // Boost score if user has a profile picture
+      if (user.photoURL) {
+        score += 5
+      }
+
+      // Boost score if user has a bio
+      if (user.bio) {
+        score += 3
+      }
+
+      return { relevance, score }
+    }
   }, [])
 
   const search = useCallback(
@@ -76,40 +116,13 @@ export function useUserSearch(
             maxResults
           )
 
-          // Process and score results
+          // Process and score results using memoized function
           const processedResults: SearchResult[] = searchResults.map((user) => {
-            const displayNameLower = user.displayName.toLowerCase()
-            const searchTermLower = searchTerm.toLowerCase()
-
-            let relevance: SearchResult['relevance'] = 'partial'
-            let score = 0
-
-            // Determine relevance and score
-            // FUTURE : Use Upstash to determine relevance and score
-            if (displayNameLower === searchTermLower) {
-              relevance = 'exact'
-              score = 100
-            } else if (displayNameLower.startsWith(searchTermLower)) {
-              relevance = 'prefix'
-              score = 80
-            } else if (displayNameLower.includes(searchTermLower)) {
-              relevance = 'partial'
-              score = 60
-            } else {
-              // Fuzzy match (handled by Upstash)
-              relevance = 'fuzzy'
-              score = 40
-            }
-
-            // Boost score if user has a profile picture
-            if (user.photoURL) {
-              score += 5
-            }
-
-            // Boost score if user has a bio
-            if (user.bio) {
-              score += 3
-            }
+            const { relevance, score } = calculateRelevanceScore(
+              user.displayName,
+              searchTerm,
+              user
+            )
 
             return {
               ...user,
@@ -135,7 +148,14 @@ export function useUserSearch(
 
       setSearchTimeout(timeout)
     },
-    [debounceMs, minSearchLength, maxResults, searchTimeout, clearResults]
+    [
+      debounceMs,
+      minSearchLength,
+      maxResults,
+      searchTimeout,
+      clearResults,
+      calculateRelevanceScore,
+    ]
   )
 
   // Cleanup timeout on unmount

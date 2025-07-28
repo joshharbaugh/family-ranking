@@ -140,6 +140,7 @@ export const UserSearch = React.memo(function UserSearch({
                       className="w-10 h-10 rounded-full object-cover"
                       width={40}
                       height={40}
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">

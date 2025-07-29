@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Trophy, Star, TrendingUp, Calendar } from 'lucide-react'
+import { Star, Calendar } from 'lucide-react'
 import { getMediaIcon, isValidUID } from '@/lib/utils'
 import { useProfileFetching } from '@/app/hooks/useProfileFetching'
 import Image from 'next/image'
@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 import { ProfileHeader } from '@/app/profile/ui/header'
 import { ProfileStatisticsGrid } from '@/app/profile/ui/statistics-grid'
+import { TopBottomRatedSection } from '@/app/profile/ui/rated-section'
 
 interface ProfilePageProps {
   params: Promise<{ uid?: string[] }>
@@ -132,77 +133,7 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
         {stats && <ProfileStatisticsGrid stats={stats} />}
 
         {/* Top & Bottom Rated */}
-        {stats && stats.highestRated && stats.lowestRated && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Highest Rated */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-yellow-600" />
-                Highest Recent Rating
-              </h3>
-              <div className="flex items-center gap-3">
-                <Image
-                  src={stats.highestRated.media?.poster || ''}
-                  alt={stats.highestRated.media?.title || ''}
-                  className="w-16 h-24 object-cover rounded shadow"
-                  width={80}
-                  height={120}
-                />
-                <div>
-                  <h4 className="font-medium">
-                    {stats.highestRated?.media?.title || 'No title'}
-                  </h4>
-                  <div className="flex items-center gap-1 mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < stats.highestRated.rank
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'fill-gray-300 text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Lowest Rated */}
-            <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-gray-600 rotate-180" />
-                Room for Improvement
-              </h3>
-              <div className="flex items-center gap-3">
-                <Image
-                  src={stats.lowestRated.media?.poster || ''}
-                  alt={stats.lowestRated.media?.title || ''}
-                  className="w-16 h-24 object-cover rounded shadow"
-                  width={80}
-                  height={120}
-                />
-                <div>
-                  <h4 className="font-medium">
-                    {stats.lowestRated?.media?.title || 'No title'}
-                  </h4>
-                  <div className="flex items-center gap-1 mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < stats.lowestRated.rank
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'fill-gray-300 text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {stats && <TopBottomRatedSection stats={stats} />}
 
         {/* Recent Activity */}
         {stats && stats.recentRankings.length > 0 && (

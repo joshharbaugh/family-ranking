@@ -1,13 +1,15 @@
 'use client'
 
 import React, { useEffect, useState, Suspense } from 'react'
-import { Users, Settings, Plus, User, ExternalLink } from 'lucide-react'
+import { Users, Settings, Plus, ExternalLink } from 'lucide-react'
 import { Invitation } from '@/lib/definitions'
 import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
 import { useFamilyStore } from '@/app/store/family-store'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Loading from '@/lib/ui/loading'
+import { UserAvatar } from '@/app/ui/user-avatar'
+import { UserProfile } from '@/lib/definitions/user'
 
 const UpdateFamilyModal = dynamic(
   () => import('@/app/ui/modals/family').then((mod) => mod.FamilyModal),
@@ -22,7 +24,6 @@ const AddFamilyMemberModal = dynamic(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { suspense: true } as any
 )
-import Image from 'next/image'
 
 interface FamilyOverviewProps {
   family: Family
@@ -201,19 +202,11 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
                   >
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      {member.photoURL ? (
-                        <Image
-                          src={member.photoURL || ''}
-                          alt={member.displayName || ''}
-                          className="w-12 h-12 rounded-full object-cover"
-                          width={48}
-                          height={48}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                        </div>
-                      )}
+                      <UserAvatar
+                        viewedProfile={member as unknown as UserProfile}
+                        isOwnProfile={false}
+                        size="md"
+                      />
                     </div>
 
                     {/* Member Info */}
@@ -292,9 +285,7 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
                     >
                       {/* Avatar */}
                       <div className="hidden md:block flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                        </div>
+                        <UserAvatar />
                       </div>
                       {/* Member Info */}
                       <div className="flex-1 min-w-0">

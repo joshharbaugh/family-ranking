@@ -154,7 +154,7 @@ const FamilyPage: React.FC = () => {
     <ProtectedRoute>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Family
@@ -169,7 +169,7 @@ const FamilyPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Create Family
+            Create
           </button>
         </div>
 

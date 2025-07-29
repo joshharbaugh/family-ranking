@@ -1,16 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Star, Calendar } from 'lucide-react'
-import { getMediaIcon, isValidUID } from '@/lib/utils'
+import { isValidUID } from '@/lib/utils'
 import { useProfileFetching } from '@/app/hooks/useProfileFetching'
-import Image from 'next/image'
 import { ProfilePageSkeleton } from '@/app/ui/skeletons'
 import Link from 'next/link'
 import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 import { ProfileHeader } from '@/app/profile/ui/header'
 import { ProfileStatisticsGrid } from '@/app/profile/ui/statistics-grid'
 import { TopBottomRatedSection } from '@/app/profile/ui/rated-section'
+import { RecentActivity } from '@/app/profile/ui/recent-activity'
 
 interface ProfilePageProps {
   params: Promise<{ uid?: string[] }>
@@ -137,49 +136,7 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
 
         {/* Recent Activity */}
         {stats && stats.recentRankings.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Recent Activity
-            </h3>
-            <div className="space-y-3">
-              {stats.recentRankings.map((ranking) => {
-                const Icon = getMediaIcon(ranking.media?.type || 'movie')
-                return (
-                  <div
-                    key={ranking.id}
-                    className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
-                  >
-                    <Image
-                      src={ranking.media?.poster || ''}
-                      alt={ranking.media?.title || ''}
-                      className="w-12 h-18 object-cover rounded"
-                      width={80}
-                      height={120}
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm flex items-center gap-2">
-                        {ranking.media?.title}
-                        <Icon className="w-3 h-3 text-gray-400" />
-                      </p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < ranking.rank
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'fill-gray-300 text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <RecentActivity stats={stats} />
         )}
 
         {/* Placeholder for other users without stats */}

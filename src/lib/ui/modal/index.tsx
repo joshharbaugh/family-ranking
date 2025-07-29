@@ -56,9 +56,9 @@ export default function Modal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? "modal-title" : undefined}
-      aria-describedby={description ? "modal-description" : undefined}
-      aria-label={!title ? "Modal dialog" : undefined}
+      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-describedby={description ? 'modal-description' : undefined}
+      aria-label={!title ? 'Modal dialog' : undefined}
       className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}

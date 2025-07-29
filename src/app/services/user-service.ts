@@ -17,6 +17,7 @@ import { db } from '@/lib/firebase'
 import { FamilyRole } from '@/lib/definitions/family'
 import { UserProfile } from '@/lib/definitions/user'
 import { UpstashService } from '@/app/services/upstash-service'
+import { isValidUID, InvalidUIDError } from '@/lib/utils'
 
 export class UserService {
   private static getUsersRef() {
@@ -24,6 +25,10 @@ export class UserService {
   }
 
   private static getUserProfileRef(userId: string) {
+    // Validate UID before creating document reference
+    if (!isValidUID(userId)) {
+      throw new InvalidUIDError(userId, 'Invalid format for user ID')
+    }
     return doc(db, 'users', userId)
   }
 
@@ -44,6 +49,10 @@ export class UserService {
     familyId: string,
     role: FamilyRole = 'other'
   ): Promise<void> {
+    // Validate UID before processing
+    if (!isValidUID(uid)) {
+      throw new InvalidUIDError(uid, 'Invalid format for user ID')
+    }
     const userProfile: Omit<UserProfile, 'displayName'> = {
       uid,
       email,
@@ -66,6 +75,11 @@ export class UserService {
 
   // Get user profile by ID
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
+    // Validate UID before processing
+    if (!isValidUID(userId)) {
+      throw new InvalidUIDError(userId, 'Invalid format for user ID')
+    }
+
     try {
       const userDoc = await getDoc(this.getUserProfileRef(userId))
 
@@ -290,6 +304,11 @@ export class UserService {
 
   // Update user profile to include displayNameLower field (for backward compatibility)
   static async updateUserForSearch(userId: string): Promise<void> {
+    // Validate UID before processing
+    if (!isValidUID(userId)) {
+      throw new InvalidUIDError(userId, 'Invalid format for user ID')
+    }
+
     try {
       const user = await this.getUserProfile(userId)
       if (!user) {
@@ -383,6 +402,11 @@ export class UserService {
     userId: string,
     updates: Partial<UserProfile>
   ): Promise<void> {
+    // Validate UID before processing
+    if (!isValidUID(userId)) {
+      throw new InvalidUIDError(userId, 'Invalid format for user ID')
+    }
+
     try {
       const userRef = this.getUserProfileRef(userId)
 

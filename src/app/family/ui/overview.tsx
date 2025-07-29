@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useEffect, useState, Suspense } from 'react'
-import { Users, Settings, Plus, User } from 'lucide-react'
+import { Users, Settings, Plus, User, ExternalLink } from 'lucide-react'
 import { Invitation } from '@/lib/definitions'
 import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
 import { useFamilyStore } from '@/app/store/family-store'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import Loading from '@/lib/ui/loading'
 
 const UpdateFamilyModal = dynamic(
@@ -219,7 +220,18 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {member.displayName}
+                          <Link
+                            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
+                            href={
+                              member.userId === currentUserId
+                                ? `/profile`
+                                : `/profile/` + member.userId
+                            }
+                            target="_blank"
+                          >
+                            {member.displayName}
+                            <ExternalLink className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          </Link>
                         </h4>
                         {member.userId === currentUserId && (
                           <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">

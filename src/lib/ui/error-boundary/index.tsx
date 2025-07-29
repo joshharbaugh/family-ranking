@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const errorString = errorInfo.componentStack || 'Unknown error location'
     this.setState({ errorInfo: errorString })
-    
+
     // Log error to console in development
     if (process.env.NODE_ENV === 'development') {
       console.error('ErrorBoundary caught an error:', error, errorInfo)
@@ -63,7 +63,7 @@ export default class ErrorBoundary extends Component<
           <p className="text-sm text-red-700 dark:text-red-300 text-center mb-4 max-w-md">
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
-          <Button 
+          <Button
             onClick={this.handleRetry}
             variant="outline"
             className="flex items-center gap-2"

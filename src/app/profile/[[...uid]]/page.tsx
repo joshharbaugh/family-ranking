@@ -18,7 +18,13 @@ import {
   Gamepad2,
 } from 'lucide-react'
 import { UserStats, UserProfile } from '@/lib/definitions/user'
-import { getInitials, getMediaIcon, debounce } from '@/lib/utils'
+import {
+  getInitials,
+  getMediaIcon,
+  debounce,
+  isValidUID,
+  InvalidUIDError,
+} from '@/lib/utils'
 import { useUserStore } from '@/app/store/user-store'
 import { UserService } from '@/app/services/user-service'
 import { db } from '@/lib/firebase'
@@ -35,24 +41,46 @@ interface ProfilePageProps {
 
 const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
   // Parse the uid from params - if no uid provided, show current user's profile
-  const [targetUserId, setTargetUserId] = React.useState<string | undefined>(undefined)
+  const [targetUserId, setTargetUserId] = React.useState<string | undefined>(
+    undefined
+  )
   const [paramsLoaded, setParamsLoaded] = React.useState(false)
   const currentUserProfile = useUserStore((state) => state.userProfile)
   const updateUserProfile = useUserStore((state) => state.updateUserProfile)
-  
-  // Load params asynchronously
+
+  // Load params asynchronously with validation
   useEffect(() => {
     const loadParams = async () => {
-      const resolvedParams = await params
-      setTargetUserId(resolvedParams.uid?.[0])
-      setParamsLoaded(true)
+      try {
+        const resolvedParams = await params
+        const rawUid = resolvedParams.uid?.[0]
+
+        if (rawUid) {
+          // Validate the UID for security
+          if (!isValidUID(rawUid)) {
+            console.warn('Invalid UID detected:', rawUid)
+            setError('Invalid user ID format')
+            setParamsLoaded(true)
+            return
+          }
+          setTargetUserId(rawUid)
+        } else {
+          setTargetUserId(undefined)
+        }
+
+        setParamsLoaded(true)
+      } catch (err) {
+        console.error('Error loading params:', err)
+        setError('Failed to load profile parameters')
+        setParamsLoaded(true)
+      }
     }
     loadParams()
   }, [params])
 
   // Determine if we're viewing our own profile or someone else's
   const isOwnProfile = !targetUserId || targetUserId === currentUserProfile?.uid
-  
+
   // State for the profile being viewed (could be current user or other user)
   const [viewedProfile, setViewedProfile] = useState<UserProfile | null>(
     isOwnProfile ? currentUserProfile : null
@@ -65,83 +93,101 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
 
   // Use rankings hook - will need to be enhanced to support other users in Phase 3
   const { getUserStats, rankings } = useRankings()
-  
+
   // Keep track of the current fetch to avoid race conditions
   const currentFetchRef = useRef<string | null>(null)
 
   // Memoized profile fetching function to prevent unnecessary recreations
-  const fetchProfileData = useCallback(async (userId?: string, isOwn: boolean = false) => {
-    // Don't fetch data until params are loaded
-    if (!paramsLoaded) {
-      return
-    }
-
-    // Create a unique identifier for this fetch
-    const fetchId = `${userId || 'own'}-${Date.now()}`
-    currentFetchRef.current = fetchId
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      let profileToView: UserProfile | null = null
-
-      if (isOwn) {
-        // Use current user's profile from store
-        profileToView = currentUserProfile
-      } else {
-        // Fetch other user's profile
-        if (userId) {
-          profileToView = await UserService.getUserProfile(userId)
-          
-          // Check if this fetch is still the current one (prevent race conditions)
-          if (currentFetchRef.current !== fetchId) {
-            return // Abort if a newer fetch has started
-          }
-          
-          if (!profileToView) {
-            setError('User not found')
-            setLoading(false)
-            return
-          }
-        }
-      }
-
-      // Final race condition check before updating state
-      if (currentFetchRef.current !== fetchId) {
+  const fetchProfileData = useCallback(
+    async (userId?: string, isOwn: boolean = false) => {
+      // Don't fetch data until params are loaded
+      if (!paramsLoaded) {
         return
       }
 
-      if (profileToView) {
-        setViewedProfile(profileToView)
-        setTempBio(profileToView.bio || '')
-        
-        // For now, only get stats for current user - will enhance in Phase 3
+      // Create a unique identifier for this fetch
+      const fetchId = `${userId || 'own'}-${Date.now()}`
+      currentFetchRef.current = fetchId
+
+      try {
+        setLoading(true)
+        setError(null)
+
+        let profileToView: UserProfile | null = null
+
         if (isOwn) {
-          const userStats = await getUserStats()
-          
-          // Final check before setting stats
-          if (currentFetchRef.current === fetchId) {
-            setStats(userStats)
-          }
+          // Use current user's profile from store
+          profileToView = currentUserProfile
         } else {
-          // Placeholder for other users' stats - will implement in Phase 3
-          setStats(null)
+          // Fetch other user's profile
+          if (userId) {
+            try {
+              profileToView = await UserService.getUserProfile(userId)
+
+              // Check if this fetch is still the current one (prevent race conditions)
+              if (currentFetchRef.current !== fetchId) {
+                return // Abort if a newer fetch has started
+              }
+
+              if (!profileToView) {
+                setError('User not found')
+                setLoading(false)
+                return
+              }
+            } catch (fetchError) {
+              // Check if this fetch is still the current one
+              if (currentFetchRef.current !== fetchId) {
+                return
+              }
+
+              if (fetchError instanceof InvalidUIDError) {
+                setError('Invalid user ID format')
+              } else {
+                setError('Failed to load user profile')
+              }
+              setLoading(false)
+              return
+            }
+          }
+        }
+
+        // Final race condition check before updating state
+        if (currentFetchRef.current !== fetchId) {
+          return
+        }
+
+        if (profileToView) {
+          setViewedProfile(profileToView)
+          setTempBio(profileToView.bio || '')
+
+          // For now, only get stats for current user - will enhance in Phase 3
+          if (isOwn) {
+            const userStats = await getUserStats()
+
+            // Final check before setting stats
+            if (currentFetchRef.current === fetchId) {
+              setStats(userStats)
+            }
+          } else {
+            // Placeholder for other users' stats - will implement in Phase 3
+            setStats(null)
+          }
+        }
+      } catch (err) {
+        // Only update error if this is still the current fetch
+        if (currentFetchRef.current === fetchId) {
+          console.error('Error fetching profile data:', err)
+          setError('Failed to load profile')
+        }
+      } finally {
+        // Only update loading if this is still the current fetch
+        if (currentFetchRef.current === fetchId) {
+          setLoading(false)
         }
       }
-    } catch (err) {
-      // Only update error if this is still the current fetch
-      if (currentFetchRef.current === fetchId) {
-        console.error('Error fetching profile data:', err)
-        setError('Failed to load profile')
-      }
-    } finally {
-      // Only update loading if this is still the current fetch
-      if (currentFetchRef.current === fetchId) {
-        setLoading(false)
-      }
-    }
-  }, [paramsLoaded, currentUserProfile, getUserStats])
+    },
+    [paramsLoaded, currentUserProfile, getUserStats]
+  )
 
   // Create debounced version of fetchProfileData
   const debouncedFetchProfile = useMemo(
@@ -164,14 +210,26 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
         debouncedFetchProfile(targetUserId, false)
       }
     }
-  }, [paramsLoaded, targetUserId, isOwnProfile, fetchProfileData, debouncedFetchProfile])
+  }, [
+    paramsLoaded,
+    targetUserId,
+    isOwnProfile,
+    fetchProfileData,
+    debouncedFetchProfile,
+  ])
 
   // Also trigger when current user profile or rankings change (for own profile)
   useEffect(() => {
     if (paramsLoaded && isOwnProfile) {
       fetchProfileData(undefined, true)
     }
-  }, [currentUserProfile, rankings, paramsLoaded, isOwnProfile, fetchProfileData])
+  }, [
+    currentUserProfile,
+    rankings,
+    paramsLoaded,
+    isOwnProfile,
+    fetchProfileData,
+  ])
 
   // Cleanup effect to cancel pending debounced calls on unmount
   useEffect(() => {
@@ -216,8 +274,12 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
           {error === 'User not found' ? (
             <span>
               {' '}
-              The user you&apos;re looking for doesn&apos;t exist or may have been removed.{' '}
-              <Link href="/profile" className="text-indigo-600 dark:text-indigo-400">
+              The user you&apos;re looking for doesn&apos;t exist or may have
+              been removed.{' '}
+              <Link
+                href="/profile"
+                className="text-indigo-600 dark:text-indigo-400"
+              >
                 Go to your profile
               </Link>
             </span>
@@ -225,7 +287,10 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
             <span>
               {' '}
               Please try again later or{' '}
-              <Link href="/profile" className="text-indigo-600 dark:text-indigo-400">
+              <Link
+                href="/profile"
+                className="text-indigo-600 dark:text-indigo-400"
+              >
                 refresh the page
               </Link>
             </span>
@@ -239,7 +304,8 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
     return (
       <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
         <p className="text-sm text-yellow-600 dark:text-yellow-400">
-          <strong>Profile not found:</strong> Unable to load the requested profile.
+          <strong>Profile not found:</strong> Unable to load the requested
+          profile.
         </p>
       </div>
     )
@@ -306,7 +372,10 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
                 ) : (
                   <div className="group">
                     <p className="text-gray-600 dark:text-gray-400 pr-8">
-                      {viewedProfile?.bio || (isOwnProfile ? 'Add a bio to tell others about yourself...' : 'No bio available.')}
+                      {viewedProfile?.bio ||
+                        (isOwnProfile
+                          ? 'Add a bio to tell others about yourself...'
+                          : 'No bio available.')}
                     </p>
                     {isOwnProfile && (
                       <button
@@ -345,134 +414,135 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
           </div>
 
           {/* Favorite Genres */}
-          {viewedProfile?.favoriteGenres && viewedProfile.favoriteGenres.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Favorite Genres
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {viewedProfile.favoriteGenres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
-                  >
-                    {genre}
-                  </span>
-                ))}
+          {viewedProfile?.favoriteGenres &&
+            viewedProfile.favoriteGenres.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Favorite Genres
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {viewedProfile.favoriteGenres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         {/* Statistics Grid - Only show for own profile with stats */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Media Breakdown */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-              <PieChart className="w-4 h-4" />
-              Media Breakdown
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm">
-                  <Film className="w-4 h-4 text-blue-500" />
-                  Movies
-                </span>
-                <span className="font-semibold">{stats.movieCount}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm">
-                  <Tv className="w-4 h-4 text-green-500" />
-                  TV Shows
-                </span>
-                <span className="font-semibold">{stats.tvCount}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm">
-                  <Book className="w-4 h-4 text-purple-500" />
-                  Books
-                </span>
-                <span className="font-semibold">{stats.bookCount}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm">
-                  <Gamepad2 className="w-4 h-4 text-yellow-500" />
-                  Games
-                </span>
-                <span className="font-semibold">{stats.gameCount}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Rating Distribution */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Rating Distribution
-            </h3>
-            <div className="space-y-2">
-              {[5, 4, 3, 2, 1].map((rating) => (
-                <div key={rating} className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 w-20">
-                    {[...Array(rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-3 h-3 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-indigo-600 dark:bg-indigo-400 h-full transition-all duration-500"
-                      style={{
-                        width: `${stats.total > 0 ? (stats.ratingDistribution[rating - 1] / stats.total) * 100 : 0}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">
-                    {stats.ratingDistribution[rating - 1]}
+            {/* Media Breakdown */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <PieChart className="w-4 h-4" />
+                Media Breakdown
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm">
+                    <Film className="w-4 h-4 text-blue-500" />
+                    Movies
                   </span>
+                  <span className="font-semibold">{stats.movieCount}</span>
                 </div>
-              ))}
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm">
+                    <Tv className="w-4 h-4 text-green-500" />
+                    TV Shows
+                  </span>
+                  <span className="font-semibold">{stats.tvCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm">
+                    <Book className="w-4 h-4 text-purple-500" />
+                    Books
+                  </span>
+                  <span className="font-semibold">{stats.bookCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm">
+                    <Gamepad2 className="w-4 h-4 text-yellow-500" />
+                    Games
+                  </span>
+                  <span className="font-semibold">{stats.gameCount}</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Achievements */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-              <Award className="w-4 h-4" />
-              Achievements
-            </h3>
-            <div className="space-y-2">
-              {stats.total >= 10 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Trophy className="w-4 h-4 text-yellow-500" />
-                  <span>Ranked 10+ items</span>
-                </div>
-              )}
-              {stats.total >= 25 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Star className="w-4 h-4 text-indigo-500" />
-                  <span>Super Ranker (25+)</span>
-                </div>
-              )}
-              {stats.movieCount >= 5 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Film className="w-4 h-4 text-blue-500" />
-                  <span>Movie Buff</span>
-                </div>
-              )}
-              {Number(stats.avgRating) >= 4 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span>Positive Reviewer</span>
-                </div>
-              )}
+            {/* Rating Distribution */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Rating Distribution
+              </h3>
+              <div className="space-y-2">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <div key={rating} className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 w-20">
+                      {[...Array(rating)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                        />
+                      ))}
+                    </div>
+                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-indigo-600 dark:bg-indigo-400 h-full transition-all duration-500"
+                        style={{
+                          width: `${stats.total > 0 ? (stats.ratingDistribution[rating - 1] / stats.total) * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">
+                      {stats.ratingDistribution[rating - 1]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Achievements */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <Award className="w-4 h-4" />
+                Achievements
+              </h3>
+              <div className="space-y-2">
+                {stats.total >= 10 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    <span>Ranked 10+ items</span>
+                  </div>
+                )}
+                {stats.total >= 25 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Star className="w-4 h-4 text-indigo-500" />
+                    <span>Super Ranker (25+)</span>
+                  </div>
+                )}
+                {stats.movieCount >= 5 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Film className="w-4 h-4 text-blue-500" />
+                    <span>Movie Buff</span>
+                  </div>
+                )}
+                {Number(stats.avgRating) >= 4 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span>Positive Reviewer</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {/* Top & Bottom Rated */}
@@ -550,56 +620,57 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
 
         {/* Recent Activity */}
         {stats && stats.recentRankings.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Recent Activity
-              </h3>
-              <div className="space-y-3">
-                {stats.recentRankings.map((ranking) => {
-                  const Icon = getMediaIcon(ranking.media?.type || 'movie')
-                  return (
-                    <div
-                      key={ranking.id}
-                      className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
-                    >
-                      <Image
-                        src={ranking.media?.poster || ''}
-                        alt={ranking.media?.title || ''}
-                        className="w-12 h-18 object-cover rounded"
-                        width={80}
-                        height={120}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm flex items-center gap-2">
-                          {ranking.media?.title}
-                          <Icon className="w-3 h-3 text-gray-400" />
-                        </p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-3 h-3 ${
-                                i < ranking.rank
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'fill-gray-300 text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Recent Activity
+            </h3>
+            <div className="space-y-3">
+              {stats.recentRankings.map((ranking) => {
+                const Icon = getMediaIcon(ranking.media?.type || 'movie')
+                return (
+                  <div
+                    key={ranking.id}
+                    className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
+                  >
+                    <Image
+                      src={ranking.media?.poster || ''}
+                      alt={ranking.media?.title || ''}
+                      className="w-12 h-18 object-cover rounded"
+                      width={80}
+                      height={120}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm flex items-center gap-2">
+                        {ranking.media?.title}
+                        <Icon className="w-3 h-3 text-gray-400" />
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${
+                              i < ranking.rank
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'fill-gray-300 text-gray-300'
+                            }`}
+                          />
+                        ))}
                       </div>
                     </div>
-                  )
-                })}
-              </div>
+                  </div>
+                )
+              })}
             </div>
+          </div>
         )}
 
         {/* Placeholder for other users without stats */}
         {!isOwnProfile && !stats && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-center">
             <p className="text-gray-600 dark:text-gray-400">
-              {viewedProfile?.displayName}&apos;s detailed statistics and activity will be available soon.
+              {viewedProfile?.displayName}&apos;s detailed statistics and
+              activity will be available soon.
             </p>
           </div>
         )}

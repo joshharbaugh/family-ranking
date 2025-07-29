@@ -17,9 +17,10 @@ import {
   Sparkles,
   Gamepad2,
 } from 'lucide-react'
-import { UserStats } from '@/lib/definitions/user'
+import { UserStats, UserProfile } from '@/lib/definitions/user'
 import { getInitials, getMediaIcon } from '@/lib/utils'
 import { useUserStore } from '@/app/store/user-store'
+import { UserService } from '@/app/services/user-service'
 import { db } from '@/lib/firebase'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useRankings } from '@/app/hooks/useRankings'
@@ -28,27 +29,98 @@ import { ProfilePageSkeleton } from '@/app/ui/skeletons'
 import Link from 'next/link'
 import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 
-const ProfilePage = (): React.ReactElement => {
-  const { getUserStats, rankings } = useRankings()
-  const userProfile = useUserStore((state) => state.userProfile)
+interface ProfilePageProps {
+  params: Promise<{ uid?: string[] }>
+}
+
+const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
+  // Parse the uid from params - if no uid provided, show current user's profile
+  const [targetUserId, setTargetUserId] = React.useState<string | undefined>(undefined)
+  const [paramsLoaded, setParamsLoaded] = React.useState(false)
+  const currentUserProfile = useUserStore((state) => state.userProfile)
   const updateUserProfile = useUserStore((state) => state.updateUserProfile)
+  
+  // Load params asynchronously
+  useEffect(() => {
+    const loadParams = async () => {
+      const resolvedParams = await params
+      setTargetUserId(resolvedParams.uid?.[0])
+      setParamsLoaded(true)
+    }
+    loadParams()
+  }, [params])
+
+  // Determine if we're viewing our own profile or someone else's
+  const isOwnProfile = !targetUserId || targetUserId === currentUserProfile?.uid
+  
+  // State for the profile being viewed (could be current user or other user)
+  const [viewedProfile, setViewedProfile] = useState<UserProfile | null>(
+    isOwnProfile ? currentUserProfile : null
+  )
   const [isEditingBio, setIsEditingBio] = useState(false)
-  const [tempBio, setTempBio] = useState(userProfile?.bio)
+  const [tempBio, setTempBio] = useState('')
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Use rankings hook - will need to be enhanced to support other users in Phase 3
+  const { getUserStats, rankings } = useRankings()
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const userStats = await getUserStats()
-      setStats(userStats)
-      setLoading(false)
+    const fetchProfileData = async () => {
+      // Don't fetch data until params are loaded
+      if (!paramsLoaded) {
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError(null)
+
+        let profileToView: UserProfile | null = null
+
+        if (isOwnProfile) {
+          // Use current user's profile from store
+          profileToView = currentUserProfile
+        } else {
+          // Fetch other user's profile
+          if (targetUserId) {
+            profileToView = await UserService.getUserProfile(targetUserId)
+            if (!profileToView) {
+              setError('User not found')
+              setLoading(false)
+              return
+            }
+          }
+        }
+
+        if (profileToView) {
+          setViewedProfile(profileToView)
+          setTempBio(profileToView.bio || '')
+          
+          // For now, only get stats for current user - will enhance in Phase 3
+          if (isOwnProfile) {
+            const userStats = await getUserStats()
+            setStats(userStats)
+          } else {
+            // Placeholder for other users' stats - will implement in Phase 3
+            setStats(null)
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching profile data:', err)
+        setError('Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
     }
-    fetchStats()
-  }, [getUserStats, rankings])
+
+    fetchProfileData()
+  }, [paramsLoaded, targetUserId, isOwnProfile, currentUserProfile, getUserStats, rankings])
 
   const handleSaveBio = async () => {
-    if (!userProfile) return
-    const userRef = doc(db, 'users', userProfile?.uid)
+    if (!currentUserProfile || !isOwnProfile) return
+    const userRef = doc(db, 'users', currentUserProfile.uid)
 
     await setDoc(
       userRef,
@@ -58,33 +130,53 @@ const ProfilePage = (): React.ReactElement => {
       },
       { merge: true }
     )
-    updateUserProfile({ ...userProfile, bio: tempBio })
+    updateUserProfile({ ...currentUserProfile, bio: tempBio })
+    setViewedProfile({ ...currentUserProfile, bio: tempBio })
 
     setIsEditingBio(false)
   }
 
   const handleCancelBio = () => {
-    setTempBio(userProfile?.bio)
+    setTempBio(viewedProfile?.bio || '')
     setIsEditingBio(false)
   }
 
-  if (loading || !stats) {
+  if (loading) {
     return <ProfilePageSkeleton />
   }
 
-  if (!loading && !stats) {
+  if (error) {
     return (
       <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
         <p className="text-sm text-red-600 dark:text-red-400">
-          <strong>Error:</strong> We are unable to load your profile statistics.
-          Please try again later or{' '}
-          <Link
-            href="/profile"
-            className="text-indigo-600 dark:text-indigo-400"
-          >
-            refresh the page
-          </Link>
-          .
+          <strong>Error:</strong> {error}
+          {error === 'User not found' ? (
+            <span>
+              {' '}
+              The user you&apos;re looking for doesn&apos;t exist or may have been removed.{' '}
+              <Link href="/profile" className="text-indigo-600 dark:text-indigo-400">
+                Go to your profile
+              </Link>
+            </span>
+          ) : (
+            <span>
+              {' '}
+              Please try again later or{' '}
+              <Link href="/profile" className="text-indigo-600 dark:text-indigo-400">
+                refresh the page
+              </Link>
+            </span>
+          )}
+        </p>
+      </div>
+    )
+  }
+
+  if (!viewedProfile) {
+    return (
+      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <p className="text-sm text-yellow-600 dark:text-yellow-400">
+          <strong>Profile not found:</strong> Unable to load the requested profile.
         </p>
       </div>
     )
@@ -100,29 +192,31 @@ const ProfilePage = (): React.ReactElement => {
             <div className="relative group">
               <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                 {getInitials(
-                  userProfile?.displayName || userProfile?.email || null
+                  viewedProfile?.displayName || viewedProfile?.email || null
                 )}
               </div>
-              <button
-                title="Change Avatar"
-                className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Camera className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </button>
+              {isOwnProfile && (
+                <button
+                  title="Change Avatar"
+                  className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Camera className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                </button>
+              )}
             </div>
 
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {userProfile?.displayName}
+                {viewedProfile?.displayName}
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mb-3">
-                {userProfile?.email}
+                {viewedProfile?.email}
               </p>
 
               {/* Bio Section */}
               <div className="relative">
-                {isEditingBio ? (
+                {isEditingBio && isOwnProfile ? (
                   <div className="space-y-2">
                     <textarea
                       value={tempBio}
@@ -149,61 +243,68 @@ const ProfilePage = (): React.ReactElement => {
                 ) : (
                   <div className="group">
                     <p className="text-gray-600 dark:text-gray-400 pr-8">
-                      {userProfile?.bio}
+                      {viewedProfile?.bio || (isOwnProfile ? 'Add a bio to tell others about yourself...' : 'No bio available.')}
                     </p>
-                    <button
-                      onClick={() => setIsEditingBio(true)}
-                      className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Edit3 className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
-                    </button>
+                    {isOwnProfile && (
+                      <button
+                        onClick={() => setIsEditingBio(true)}
+                        className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Edit3 className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="flex sm:flex-col gap-4 sm:gap-2 text-center">
-              <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {stats.total}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Rankings
-                </p>
+            {stats && (
+              <div className="flex sm:flex-col gap-4 sm:gap-2 text-center">
+                <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {stats.total}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Rankings
+                  </p>
+                </div>
+                <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {stats.avgRating}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Avg Rating
+                  </p>
+                </div>
               </div>
-              <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  {stats.avgRating}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Avg Rating
-                </p>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Favorite Genres */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Favorite Genres
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {userProfile?.favoriteGenres.map((genre) => (
-                <span
-                  key={genre}
-                  className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
-                >
-                  {genre}
-                </span>
-              ))}
+          {viewedProfile?.favoriteGenres && viewedProfile.favoriteGenres.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Favorite Genres
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {viewedProfile.favoriteGenres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Statistics Grid - Only show for own profile with stats */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Media Breakdown */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
@@ -309,9 +410,10 @@ const ProfilePage = (): React.ReactElement => {
             </div>
           </div>
         </div>
+        )}
 
         {/* Top & Bottom Rated */}
-        {stats.highestRated && stats.lowestRated && (
+        {stats && stats.highestRated && stats.lowestRated && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Highest Rated */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4">
@@ -384,49 +486,58 @@ const ProfilePage = (): React.ReactElement => {
         )}
 
         {/* Recent Activity */}
-        {stats.recentRankings.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Recent Activity
-            </h3>
-            <div className="space-y-3">
-              {stats.recentRankings.map((ranking) => {
-                const Icon = getMediaIcon(ranking.media?.type || 'movie')
-                return (
-                  <div
-                    key={ranking.id}
-                    className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
-                  >
-                    <Image
-                      src={ranking.media?.poster || ''}
-                      alt={ranking.media?.title || ''}
-                      className="w-12 h-18 object-cover rounded"
-                      width={80}
-                      height={120}
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm flex items-center gap-2">
-                        {ranking.media?.title}
-                        <Icon className="w-3 h-3 text-gray-400" />
-                      </p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < ranking.rank
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'fill-gray-300 text-gray-300'
-                            }`}
-                          />
-                        ))}
+        {stats && stats.recentRankings.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Recent Activity
+              </h3>
+              <div className="space-y-3">
+                {stats.recentRankings.map((ranking) => {
+                  const Icon = getMediaIcon(ranking.media?.type || 'movie')
+                  return (
+                    <div
+                      key={ranking.id}
+                      className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
+                    >
+                      <Image
+                        src={ranking.media?.poster || ''}
+                        alt={ranking.media?.title || ''}
+                        className="w-12 h-18 object-cover rounded"
+                        width={80}
+                        height={120}
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm flex items-center gap-2">
+                          {ranking.media?.title}
+                          <Icon className="w-3 h-3 text-gray-400" />
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${
+                                i < ranking.rank
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'fill-gray-300 text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
+        )}
+
+        {/* Placeholder for other users without stats */}
+        {!isOwnProfile && !stats && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              {viewedProfile?.displayName}&apos;s detailed statistics and activity will be available soon.
+            </p>
           </div>
         )}
       </div>

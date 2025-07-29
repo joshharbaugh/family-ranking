@@ -23,7 +23,7 @@ export const Navigation = (): React.ReactElement => {
     if (path === '/search' || path === '/') return 'search'
     if (path === '/rankings') return 'rankings'
     if (path === '/family') return 'family'
-    if (path === '/profile') return 'profile'
+    if (path.startsWith('/profile')) return 'profile'
     return 'search'
   }
 

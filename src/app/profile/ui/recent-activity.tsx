@@ -2,7 +2,7 @@
 
 import { Calendar } from 'lucide-react'
 import { UserStats } from '@/lib/definitions/user'
-import { RankingCard } from '@/app/ui/ranking-card'
+import { RankingCard } from '@/app/ui/cards/ranking-card'
 
 interface RecentActivityProps {
   stats?: UserStats | null

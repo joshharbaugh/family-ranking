@@ -1,9 +1,9 @@
 'use client'
 
 import { UserStats } from '@/lib/definitions/user'
-import { MediaBreakdown } from '@/app/ui/media-breakdown'
-import { RatingDistribution } from '@/app/ui/rating-distribution'
-import { Achievements } from '@/app/ui/achievements'
+import { MediaBreakdown } from '@/app/ui/cards/media-breakdown'
+import { RatingDistribution } from '@/app/ui/cards/rating-distribution'
+import { Achievements } from '@/app/ui/cards/achievements'
 
 interface ProfileStatisticsGridProps {
   stats?: UserStats | null

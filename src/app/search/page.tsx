@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useCallback, useMemo } from 'react'
 import { Search, Film, Tv, Book, Loader2, Gamepad2 } from 'lucide-react'
 import { Media, MediaType, Ranking } from '@/lib/definitions/index'
-import { MediaCard } from '@/app/ui/media-card'
+import { MediaCard } from '@/app/ui/cards/media-card'
 import { useSearch } from '@/app/hooks/useSearch'
 import { useRankings } from '@/app/hooks/useRankings'
 import dynamic from 'next/dynamic'

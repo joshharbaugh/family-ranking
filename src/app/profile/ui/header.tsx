@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Camera, Edit3, Sparkles } from 'lucide-react'
-import { getInitials } from '@/lib/utils'
+import { Edit3, Sparkles } from 'lucide-react'
 import { useUserStore } from '@/app/store/user-store'
 import { db } from '@/lib/firebase'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { UserProfile, UserStats } from '@/lib/definitions/user'
+import { UserAvatar } from '@/app/ui/user-avatar'
 
 interface ProfileHeaderProps {
   viewedProfile: UserProfile
@@ -73,21 +73,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {/* Avatar */}
-        <div className="relative group">
-          <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-            {getInitials(
-              viewedProfile?.displayName || viewedProfile?.email || null
-            )}
-          </div>
-          {isOwnProfile && (
-            <button
-              title="Change Avatar"
-              className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Camera className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </button>
-          )}
-        </div>
+        <UserAvatar viewedProfile={viewedProfile} isOwnProfile={isOwnProfile} />
 
         {/* User Info */}
         <div className="flex-1 text-center sm:text-left">

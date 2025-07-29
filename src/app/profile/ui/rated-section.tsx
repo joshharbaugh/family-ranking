@@ -1,8 +1,8 @@
 'use client'
 
 import { UserStats } from '@/lib/definitions/user'
-import { HighestRated } from '@/app/ui/highest-rated'
-import { LowestRated } from '@/app/ui/lowest-rated'
+import { HighestRated } from '@/app/ui/cards/highest-rated'
+import { LowestRated } from '@/app/ui/cards/lowest-rated'
 
 interface TopBottomRatedSectionProps {
   stats?: UserStats | null

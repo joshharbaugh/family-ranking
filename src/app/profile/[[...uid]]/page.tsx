@@ -1,19 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import {
-  Trophy,
-  Star,
-  TrendingUp,
-  Film,
-  Tv,
-  Book,
-  BarChart3,
-  PieChart,
-  Calendar,
-  Award,
-  Gamepad2,
-} from 'lucide-react'
+import { Trophy, Star, TrendingUp, Calendar } from 'lucide-react'
 import { getMediaIcon, isValidUID } from '@/lib/utils'
 import { useProfileFetching } from '@/app/hooks/useProfileFetching'
 import Image from 'next/image'
@@ -21,6 +9,7 @@ import { ProfilePageSkeleton } from '@/app/ui/skeletons'
 import Link from 'next/link'
 import { ProtectedRoute } from '@/app/components/ProtectedRoute'
 import { ProfileHeader } from '@/app/profile/ui/header'
+import { ProfileStatisticsGrid } from '@/app/profile/ui/statistics-grid'
 
 interface ProfilePageProps {
   params: Promise<{ uid?: string[] }>
@@ -140,114 +129,7 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
         />
 
         {/* Statistics Grid - Only show for own profile with stats */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Media Breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <PieChart className="w-4 h-4" />
-                Media Breakdown
-              </h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Film className="w-4 h-4 text-blue-500" />
-                    Movies
-                  </span>
-                  <span className="font-semibold">{stats.movieCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Tv className="w-4 h-4 text-green-500" />
-                    TV Shows
-                  </span>
-                  <span className="font-semibold">{stats.tvCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Book className="w-4 h-4 text-purple-500" />
-                    Books
-                  </span>
-                  <span className="font-semibold">{stats.bookCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Gamepad2 className="w-4 h-4 text-yellow-500" />
-                    Games
-                  </span>
-                  <span className="font-semibold">{stats.gameCount}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Rating Distribution */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Rating Distribution
-              </h3>
-              <div className="space-y-2">
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <div key={rating} className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 w-20">
-                      {[...Array(rating)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-3 h-3 fill-yellow-400 text-yellow-400"
-                        />
-                      ))}
-                    </div>
-                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-indigo-600 dark:bg-indigo-400 h-full transition-all duration-500"
-                        style={{
-                          width: `${stats.total > 0 ? (stats.ratingDistribution[rating - 1] / stats.total) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">
-                      {stats.ratingDistribution[rating - 1]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Achievements */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Achievements
-              </h3>
-              <div className="space-y-2">
-                {stats.total >= 10 && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span>Ranked 10+ items</span>
-                  </div>
-                )}
-                {stats.total >= 25 && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Star className="w-4 h-4 text-indigo-500" />
-                    <span>Super Ranker (25+)</span>
-                  </div>
-                )}
-                {stats.movieCount >= 5 && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Film className="w-4 h-4 text-blue-500" />
-                    <span>Movie Buff</span>
-                  </div>
-                )}
-                {Number(stats.avgRating) >= 4 && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span>Positive Reviewer</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {stats && <ProfileStatisticsGrid stats={stats} />}
 
         {/* Top & Bottom Rated */}
         {stats && stats.highestRated && stats.lowestRated && (

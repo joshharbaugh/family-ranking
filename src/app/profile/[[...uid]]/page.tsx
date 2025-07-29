@@ -89,6 +89,8 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
   // Bio editing state (only used for own profile)
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [tempBio, setTempBio] = useState('')
+  const [isSavingBio, setIsSavingBio] = useState(false)
+  const [bioSaveError, setBioSaveError] = useState<string | null>(null)
 
   // Update tempBio when viewedProfile changes
   useEffect(() => {
@@ -98,25 +100,37 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
   }, [viewedProfile])
 
   const handleSaveBio = async () => {
-    if (!currentUserProfile || !isOwnProfile) return
-    const userRef = doc(db, 'users', currentUserProfile.uid)
+    if (!currentUserProfile || !isOwnProfile || isSavingBio) return
+    
+    setIsSavingBio(true)
+    setBioSaveError(null)
 
-    await setDoc(
-      userRef,
-      {
-        bio: tempBio,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    )
-    updateUserProfile({ ...currentUserProfile, bio: tempBio })
+    try {
+      const userRef = doc(db, 'users', currentUserProfile.uid)
 
-    setIsEditingBio(false)
+      await setDoc(
+        userRef,
+        {
+          bio: tempBio,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      )
+      
+      updateUserProfile({ ...currentUserProfile, bio: tempBio })
+      setIsEditingBio(false)
+    } catch (error) {
+      console.error('Error saving bio:', error)
+      setBioSaveError('Failed to save bio. Please try again.')
+    } finally {
+      setIsSavingBio(false)
+    }
   }
 
   const handleCancelBio = () => {
     setTempBio(viewedProfile?.bio || '')
     setIsEditingBio(false)
+    setBioSaveError(null)
   }
 
   if (loading) {
@@ -206,24 +220,60 @@ const ProfilePage = ({ params }: ProfilePageProps): React.ReactElement => {
                   <div className="space-y-2">
                     <textarea
                       value={tempBio}
-                      onChange={(e) => setTempBio(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      onChange={(e) => {
+                        setTempBio(e.target.value)
+                        // Clear error when user starts typing
+                        if (bioSaveError) {
+                          setBioSaveError(null)
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          handleCancelBio()
+                        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                          e.preventDefault()
+                          handleSaveBio()
+                        }
+                      }}
+                      disabled={isSavingBio}
+                      className={`w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                        isSavingBio ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                       rows={3}
                       maxLength={200}
+                      placeholder="Tell others about yourself..."
                     />
-                    <div className="flex gap-2">
-                      <button
+                    {bioSaveError && (
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        {bioSaveError}
+                      </p>
+                    )}
+                    <div className="flex gap-2 items-center">
+                      <div className="flex gap-2">
+                        <button
                         onClick={handleSaveBio}
-                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm"
+                        disabled={isSavingBio}
+                        className={`px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm flex items-center gap-1 ${
+                          isSavingBio
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:bg-indigo-700'
+                        }`}
                       >
-                        Save
+                        {isSavingBio && (
+                          <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                        {isSavingBio ? 'Saving...' : 'Save'}
                       </button>
                       <button
                         onClick={handleCancelBio}
-                        className="px-3 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                        disabled={isSavingBio}
+                        className={`px-3 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 ${
+                          isSavingBio ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                       >
                         Cancel
-                      </button>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (

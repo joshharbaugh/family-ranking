@@ -47,3 +47,20 @@ export const roundToDecimal = (num: number, decimalPlaces: number) => {
   const factor = Math.pow(10, decimalPlaces)
   return Math.round(num * factor) / factor
 }
+
+/**
+ * Creates a debounced version of a function that delays execution until after
+ * the specified delay period has elapsed since the last invocation
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
+  let timeoutId: NodeJS.Timeout | undefined
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }
+}

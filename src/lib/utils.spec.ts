@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { Film, Tv, Book, Gamepad2, Music } from 'lucide-react'
 import {
   getInitials,
@@ -6,6 +6,7 @@ import {
   getGameBoxart,
   formatDate,
   roundToDecimal,
+  debounce,
 } from './utils'
 import { GameBoxart } from '@/lib/definitions/index'
 
@@ -165,5 +166,86 @@ describe('roundToDecimal', () => {
   it('should handle numbers that are already rounded', () => {
     expect(roundToDecimal(3.14, 2)).toBe(3.14)
     expect(roundToDecimal(3, 2)).toBe(3)
+  })
+})
+
+describe('debounce', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should delay function execution', () => {
+    const mockFn = vi.fn()
+    const debouncedFn = debounce(mockFn, 300)
+
+    debouncedFn('test')
+    expect(mockFn).not.toHaveBeenCalled()
+
+    vi.advanceTimersByTime(300)
+    expect(mockFn).toHaveBeenCalledWith('test')
+  })
+
+  it('should cancel previous calls when called multiple times', () => {
+    const mockFn = vi.fn()
+    const debouncedFn = debounce(mockFn, 300)
+
+    debouncedFn('first')
+    debouncedFn('second')
+    debouncedFn('third')
+
+    vi.advanceTimersByTime(300)
+    
+    expect(mockFn).toHaveBeenCalledTimes(1)
+    expect(mockFn).toHaveBeenCalledWith('third')
+  })
+
+  it('should work with multiple arguments', () => {
+    const mockFn = vi.fn()
+    const debouncedFn = debounce(mockFn, 300)
+
+    debouncedFn('arg1', 'arg2', 'arg3')
+    vi.advanceTimersByTime(300)
+
+    expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2', 'arg3')
+  })
+
+  it('should reset the timer when called again before delay', () => {
+    const mockFn = vi.fn()
+    const debouncedFn = debounce(mockFn, 300)
+
+    debouncedFn('first')
+    vi.advanceTimersByTime(200)
+    
+    debouncedFn('second') // Should reset the timer
+    vi.advanceTimersByTime(200)
+    
+    expect(mockFn).not.toHaveBeenCalled()
+    
+    vi.advanceTimersByTime(100) // Total 300ms from the second call
+    expect(mockFn).toHaveBeenCalledWith('second')
+  })
+
+  it('should handle async functions', async () => {
+    const mockAsyncFn = vi.fn().mockResolvedValue('result')
+    const debouncedFn = debounce(mockAsyncFn, 300)
+
+    debouncedFn('test')
+    vi.advanceTimersByTime(300)
+
+    expect(mockAsyncFn).toHaveBeenCalledWith('test')
+  })
+
+  it('should work with no arguments', () => {
+    const mockFn = vi.fn()
+    const debouncedFn = debounce(mockFn, 300)
+
+    debouncedFn()
+    vi.advanceTimersByTime(300)
+
+    expect(mockFn).toHaveBeenCalledWith()
   })
 })

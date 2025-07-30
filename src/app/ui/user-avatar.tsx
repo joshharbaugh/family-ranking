@@ -19,6 +19,17 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   isOwnProfile = false,
   size = 'lg',
 }) => {
+  const getSizeValue = (size: UserAvatarSize) => {
+    switch (size) {
+      case 'sm':
+        return 8
+      case 'md':
+        return 12
+      case 'lg':
+        return 24
+    }
+  }
+
   const getSizeClasses = (size: UserAvatarSize) => {
     switch (size) {
       case 'sm':
@@ -33,9 +44,11 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   if (!viewedProfile) {
     return (
       <div
-        className={`${getSizeClasses('md')} rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center`}
+        className={`${getSizeClasses(size)} rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center`}
       >
-        <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+        <User
+          className={`w-${getSizeValue(size) / 2} h-${getSizeValue(size) / 2} text-gray-500 dark:text-gray-400`}
+        />
       </div>
     )
   }
@@ -52,7 +65,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
         />
       ) : (
         <div
-          className={`${getSizeClasses(size)} bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg`}
+          className={`${getSizeClasses(size)} bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold`}
         >
           {getInitials(
             viewedProfile?.displayName || viewedProfile?.email || null

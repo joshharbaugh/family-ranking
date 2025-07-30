@@ -1,15 +1,13 @@
 'use client'
 
 import React, { useEffect, useState, Suspense } from 'react'
-import { Users, Settings, Plus, ExternalLink } from 'lucide-react'
+import { Users, Settings, Plus } from 'lucide-react'
 import { Invitation } from '@/lib/definitions'
-import { Family, FamilyMember, FamilyRole } from '@/lib/definitions/family'
+import { Family, FamilyMember } from '@/lib/definitions/family'
 import { useFamilyStore } from '@/app/store/family-store'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import Loading from '@/lib/ui/loading'
-import { UserAvatar } from '@/app/ui/user-avatar'
-import { UserProfile } from '@/lib/definitions/user'
+import { MemberCard } from '@/app/family/ui/member-card'
 
 const UpdateFamilyModal = dynamic(
   () => import('@/app/ui/modals/family').then((mod) => mod.FamilyModal),
@@ -28,53 +26,6 @@ const AddFamilyMemberModal = dynamic(
 interface FamilyOverviewProps {
   family: Family
   currentUserId: string
-}
-
-const getRoleIcon = (role: FamilyRole) => {
-  switch (role) {
-    case 'parent':
-    case 'guardian':
-      return '👨‍👩‍👧‍👦'
-    case 'child':
-      return '👶'
-    case 'grandmother':
-    case 'grandfather':
-      return '👴👵'
-    case 'aunt':
-    case 'uncle':
-      return '👨‍👩‍👧‍👦'
-    case 'cousin':
-      return '👥'
-    case 'sibling':
-      return '👫'
-    default:
-      return '👤'
-  }
-}
-
-const getRoleLabel = (role: FamilyRole) => {
-  switch (role) {
-    case 'parent':
-      return 'Parent'
-    case 'guardian':
-      return 'Guardian'
-    case 'child':
-      return 'Child'
-    case 'grandmother':
-      return 'Grandmother'
-    case 'grandfather':
-      return 'Grandfather'
-    case 'aunt':
-      return 'Aunt'
-    case 'uncle':
-      return 'Uncle'
-    case 'cousin':
-      return 'Cousin'
-    case 'sibling':
-      return 'Sibling'
-    default:
-      return 'Other'
-  }
 }
 
 const FamilyOverview: React.FC<FamilyOverviewProps> = ({
@@ -192,73 +143,12 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
               )}
               {familyMembers &&
                 familyMembers.map((member: FamilyMember) => (
-                  <div
+                  <MemberCard
                     key={member.userId}
-                    className={`flex items-center gap-4 p-4 rounded-lg border ${
-                      member.userId === currentUserId
-                        ? 'border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20'
-                        : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  >
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <UserAvatar
-                        viewedProfile={member as unknown as UserProfile}
-                        isOwnProfile={false}
-                        size="md"
-                      />
-                    </div>
-
-                    {/* Member Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          <Link
-                            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
-                            href={
-                              member.userId === currentUserId
-                                ? `/profile`
-                                : `/profile/` + member.userId
-                            }
-                            target="_blank"
-                          >
-                            {member.displayName}
-                            <ExternalLink className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                          </Link>
-                        </h4>
-                        {member.userId === currentUserId && (
-                          <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">
-                            You
-                          </span>
-                        )}
-                        {member.userId === family.createdBy && (
-                          <span className="hidden md:block text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
-                            Creator
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-2xl">
-                          {getRoleIcon(member.role)}
-                        </span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {getRoleLabel(member.role)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Status */}
-                    <div className="hidden md:block flex-shrink-0">
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          member.isActive
-                            ? 'bg-green-500'
-                            : 'bg-gray-300 dark:bg-gray-600'
-                        }`}
-                      />
-                    </div>
-                  </div>
+                    member={member}
+                    family={family}
+                    currentUserId={currentUserId}
+                  />
                 ))}
             </div>
           </div>
@@ -275,54 +165,12 @@ const FamilyOverview: React.FC<FamilyOverviewProps> = ({
                     (invitation: Invitation) => invitation.status === 'pending'
                   )
                   .map((invitation: Invitation) => (
-                    <div
+                    <MemberCard
                       key={invitation.token}
-                      className={`flex items-center gap-4 p-4 rounded-lg border ${
-                        invitation.status === 'pending'
-                          ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/20'
-                          : 'border-gray-200 dark:border-gray-700'
-                      }`}
-                    >
-                      {/* Avatar */}
-                      <div className="hidden md:block flex-shrink-0">
-                        <UserAvatar />
-                      </div>
-                      {/* Member Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {invitation.email}
-                          </h4>
-                        </div>
-
-                        <div className="flex items-center gap-2 mt-1">
-                          {invitation.role && (
-                            <span className="hidden md:block text-2xl">
-                              {getRoleIcon(invitation.role)}
-                            </span>
-                          )}
-                          {invitation.role && (
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {getRoleLabel(invitation.role)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="hidden md:block flex-shrink-0">
-                        <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
-                          Sent:{' '}
-                          {invitation.createdAt instanceof Date
-                            ? invitation.createdAt.toLocaleDateString()
-                            : invitation.createdAt &&
-                                typeof invitation.createdAt.toDate ===
-                                  'function'
-                              ? invitation.createdAt
-                                  .toDate()
-                                  .toLocaleDateString()
-                              : ''}
-                        </span>
-                      </div>
-                    </div>
+                      member={invitation}
+                      family={family}
+                      currentUserId={currentUserId}
+                    />
                   ))}
             </div>
           </div>

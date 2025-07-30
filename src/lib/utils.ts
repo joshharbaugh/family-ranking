@@ -1,6 +1,10 @@
 import { Film, Tv, Book, Gamepad2, Music } from 'lucide-react'
 import { GameBoxart } from '@/lib/definitions/index'
 
+export const capitalize = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 export const getInitials = (name: string | null) => {
   if (!name) return '?'
   return name

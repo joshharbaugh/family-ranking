@@ -134,7 +134,7 @@ export const MemberCard = React.memo(function MemberCard({
               {/* Only creator of a family may remove a family member */}
               {isFamilyCreator() && (
                 <>
-                  <DropdownMenuSeparator className="m-[5px] h-px bg-gray-300" />
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem variant="danger">Remove</DropdownMenuItem>
                 </>
               )}

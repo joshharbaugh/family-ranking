@@ -3,7 +3,7 @@ import ErrorBoundary from '.'
 import { useState } from 'react'
 
 const meta: Meta<typeof ErrorBoundary> = {
-  title: 'UI/ErrorBoundary',
+  title: 'ui/ErrorBoundary',
   component: ErrorBoundary,
   parameters: {
     layout: 'padded',

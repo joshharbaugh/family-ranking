@@ -25,7 +25,18 @@ export const DropdownMenuContent = React.forwardRef<
   )
 })
 
-export const DropdownMenuLabel = DropdownMenuPrimitive.Label
+export const DropdownMenuLabel = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label>
+>(({ ...props }, forwardedRef) => {
+  return (
+    <DropdownMenuPrimitive.Label
+      ref={forwardedRef}
+      className={styles.DropdownMenuLabel}
+      {...props}
+    />
+  )
+})
 
 interface DropdownMenuItemProps
   extends React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> {
@@ -35,12 +46,12 @@ interface DropdownMenuItemProps
 /**
  * A dropdown menu item component that extends Radix UI's DropdownMenu.Item
  * with custom styling and variant support.
- * 
+ *
  * @param children - The content to display inside the menu item
  * @param variant - Visual variant of the menu item. 'danger' applies red styling for destructive actions
  * @param props - Additional props passed to the underlying Radix DropdownMenu.Item
  * @param forwardedRef - Forwarded ref to the underlying DOM element
- * 
+ *
  * @example
  * ```tsx
  * <DropdownMenuItem>View profile</DropdownMenuItem>
@@ -62,4 +73,15 @@ export const DropdownMenuItem = React.forwardRef<
   )
 })
 export const DropdownMenuGroup = DropdownMenuPrimitive.Group
-export const DropdownMenuSeparator = DropdownMenuPrimitive.Separator
+export const DropdownMenuSeparator = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
+>(({ ...props }, forwardedRef) => {
+  return (
+    <DropdownMenuPrimitive.Separator
+      ref={forwardedRef}
+      className={styles.DropdownMenuSeparator}
+      {...props}
+    />
+  )
+})

@@ -30,10 +30,10 @@ export function useProfileFetching({
 }: UseProfileFetchingOptions): UseProfileFetchingReturn {
   const currentUserProfile = useUserStore((state) => state.userProfile)
   const { getUserStats, rankings } = useRankings()
-  
+
   // Determine if we're viewing our own profile or someone else's
   const isOwnProfile = !targetUserId || targetUserId === currentUserProfile?.uid
-  
+
   // State for the profile being viewed (could be current user or other user)
   const [viewedProfile, setViewedProfile] = useState<UserProfile | null>(
     isOwnProfile ? currentUserProfile : null

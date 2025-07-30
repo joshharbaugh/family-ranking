@@ -14,12 +14,16 @@ export const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         ref={forwardedRef}
-        className={`${styles.DropdownMenuContent}`}
-        sideOffset={5}
+        className={`${styles.DropdownMenuContent} bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700`}
+        sideOffset={0}
         {...props}
       >
         {children}
-        <DropdownMenuPrimitive.Arrow className="fill-white" />
+        <DropdownMenuPrimitive.Arrow
+          height="8"
+          width="12"
+          className="fill-gray-200 dark:fill-gray-700"
+        />
       </DropdownMenuPrimitive.Content>
     </DropdownMenuPrimitive.Portal>
   )
@@ -32,7 +36,7 @@ export const DropdownMenuLabel = React.forwardRef<
   return (
     <DropdownMenuPrimitive.Label
       ref={forwardedRef}
-      className={styles.DropdownMenuLabel}
+      className={`${styles.DropdownMenuLabel} text-xs text-gray-500 dark:text-gray-400 p-2 pb-0`}
       {...props}
     />
   )
@@ -65,7 +69,7 @@ export const DropdownMenuItem = React.forwardRef<
   return (
     <DropdownMenuPrimitive.Item
       ref={forwardedRef}
-      className={`${styles.DropdownMenuItem} ${variant === 'danger' ? styles.DropdownMenuItem__danger : ''}`}
+      className={`${styles.DropdownMenuItem} ${variant === 'danger' ? 'text-red-600 dark:text-red-400 hover:bg-rose-100 dark:hover:bg-rose-700/40' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'} data-disabled:opacity-30 outline-none select-none rounded-sm flex items-center p-2 relative`}
       {...props}
     >
       {children}
@@ -80,7 +84,7 @@ export const DropdownMenuSeparator = React.forwardRef<
   return (
     <DropdownMenuPrimitive.Separator
       ref={forwardedRef}
-      className={styles.DropdownMenuSeparator}
+      className={`${styles.DropdownMenuSeparator} my-[5px] mx-[-5px] h-px bg-gray-200 dark:bg-gray-700`}
       {...props}
     />
   )
